@@ -1,4 +1,4 @@
-# The Realy Board
+# The Relay Board
 
 The [RPi Relay Boards](https://www.waveshare.com/rpi-relay-board.htm) created by Waveshare adds the needed Power Supply relays needed to turn on and off the attached test devices.  Normally these relay boards would be controlled via interrupts lines 25, 28 and 29.  Since multiple of these boards will be attached, then the default interrupt controls will interfere with each other accross all the boards.
 
