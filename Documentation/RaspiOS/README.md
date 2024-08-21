@@ -35,4 +35,25 @@ After the reboot, remove old packages
 auto apt-get autoremove
 ```
 
-# new kernel with patch (ToDo)
+---
+
+Now it is time to patch and build a new linux kernel.  The instructions can be found [here](https://www.raspberrypi.com/documentation/computers/linux_kernel.html) and it is important to apply the patch [0001-sc16is7xx.c-increase-SC16IS7XX_MAX_DEVS-to-16.patch](0001-sc16is7xx.c-increase-SC16IS7XX_MAX_DEVS-to-16.patch) before starting the build.  This patch is needed when more than 4 of the Serial Expansion HATs are used.  With the MAX_DEVS set to 16, up to 8 of the HATs can be used.  If more are needed, adjust the MAX_DEVS accordingly.
+
+```
+sudo apt install git
+git clone --depth=1 https://github.com/raspberrypi/linux
+cd linux
+wget -O /tmp/patch https://github.com/pmelange/openwrt-testlab/blob/main/Documentation/RaspiOS/0001-sc16is7xx.c-increase-SC16IS7XX_MAX_DEVS-to-16.patch](https://raw.githubusercontent.com/pmelange/openwrt-testlab/main/Documentation/RaspiOS/0001-sc16is7xx.c-increase-SC16IS7XX_MAX_DEVS-to-16.patch
+git apply /tmp/patch
+sudo apt install bc bison flex libssl-dev make
+KERNEL=kernel8
+make bcm2711_defconfig
+CONFIG_LOCALVERSION="-v8-TESTLAB"
+sudo make -j6 modules_install
+sudo cp /boot/firmware/$KERNEL.img /boot/firmware/$KERNEL-backup.img
+sudo cp arch/arm64/boot/Image.gz /boot/firmware/$KERNEL.img
+sudo cp arch/arm64/boot/dts/broadcom/*.dtb /boot/firmware/
+sudo cp arch/arm64/boot/dts/overlays/*.dtb* /boot/firmware/overlays/
+sudo cp arch/arm64/boot/dts/overlays/README /boot/firmware/overlays/
+```
+and reboot into the new kernel.
