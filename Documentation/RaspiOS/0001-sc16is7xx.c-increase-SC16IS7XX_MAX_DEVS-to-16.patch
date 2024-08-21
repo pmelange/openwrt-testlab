@@ -1,19 +1,9 @@
-From 3ed315a591d3fe72dc2cf187ba897a87ea06bf11 Mon Sep 17 00:00:00 2001
-From: Perry Melange <isprotejesvalkata@gmail.com>
-Date: Mon, 18 Mar 2024 12:54:21 +0100
-Subject: [PATCH] sc16is7xx.c: increase SC16IS7XX_MAX_DEVS to 16
-
-Signed-off-by: Perry Melange <isprotejesvalkata@gmail.com>
----
- drivers/tty/serial/sc16is7xx.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
 diff --git a/drivers/tty/serial/sc16is7xx.c b/drivers/tty/serial/sc16is7xx.c
-index eea6622122af..fc41790c2592 100644
+index 097dace67..ac1d872f1 100644
 --- a/drivers/tty/serial/sc16is7xx.c
 +++ b/drivers/tty/serial/sc16is7xx.c
 @@ -28,7 +28,7 @@
- #include <uapi/linux/sched/types.h>
+ #include <linux/units.h>
  
  #define SC16IS7XX_NAME			"sc16is7xx"
 -#define SC16IS7XX_MAX_DEVS		8
@@ -21,6 +11,3 @@ index eea6622122af..fc41790c2592 100644
  
  /* SC16IS7XX register definitions */
  #define SC16IS7XX_RHR_REG		(0x00) /* RX FIFO */
--- 
-2.39.2
-
