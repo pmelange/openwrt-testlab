@@ -49,6 +49,7 @@ sudo apt install bc bison flex libssl-dev make
 KERNEL=kernel8
 make bcm2711_defconfig
 CONFIG_LOCALVERSION="-v8-TESTLAB"
+make -j6 Image.gz modules dtbs
 sudo make -j6 modules_install
 sudo cp /boot/firmware/$KERNEL.img /boot/firmware/$KERNEL-backup.img
 sudo cp arch/arm64/boot/Image.gz /boot/firmware/$KERNEL.img
