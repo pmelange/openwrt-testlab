@@ -44,7 +44,8 @@ For detailed information about building the openwrt-testlab, see the documenatio
 
 ## Test Control Software
 
-**This is a work in progress***
+**This is a work in progress:**
+
 The idea is to integrate [labgrid](https://labgrid.readthedocs.io/en/latest/) with the openwrt-testlab as it provides a ready-made set of features.
 
 ---
