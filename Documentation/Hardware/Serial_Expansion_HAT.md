@@ -21,7 +21,7 @@ One row of GPIO pins is used in connection with each of the attached UARTs.  For
 
 ## The Linux Kernel
 
-The Linux kernel is hard coded with a maximum of 8 UARTs controlled via connected SC16IS752 chips.  The reason for this limit is not clear and is probably a case of "8 should be enough".  With a small modification to the kernel, this can be easily increased to 16.  A patch can be seen [here](https://github.com/pmelange/raspi-linux/commit/3ed315a591d3fe72dc2cf187ba897a87ea06bf11).  For more information about how to compile and install the Linux kernel, please take a look at the documentation at raspberrypi.com page [The Linux kernel](https://www.raspberrypi.com/documentation/computers/linux_kernel.html)
+The Linux kernel is hard coded with a maximum of 8 UARTs controlled via connected SC16IS752 chips.  The reason for this limit is not clear and is probably a case of "8 should be enough".  With a small modification to the kernel, this can be easily increased to 16.  A patch can be seen [here](../RaspiOS/0001-sc16is7xx.c-increase-SC16IS7XX_MAX_DEVS-to-16.patch).  For more information about how to compile and install the Linux kernel, please take a look at the documentation at raspberrypi.com page [Installing Raspberry Pi OS](../RaspiOS).
 
 ## Device Tree overlay for the SC16IS752
 
