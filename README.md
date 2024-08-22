@@ -34,7 +34,7 @@ The reset button pins on the terminal are to be connected to additional jumper c
 
 The TTY serial interface of the attached OpenWrt device must be connected to the terminal such that the TX line of the OpenWrt device is connected to the RX pin on the terminal and the RX line of the OpenWrt device is connected to the RX pin on the terminal.  Ground is always connected to ground.  In addition the Vcc terminal pin is provided but in almost all cases this will not be needed.  For this, the attached OpenWrt device needs to be modified so that jumper cables from the devices TTY serial interface are easily available.
 
-** Documentation on how to modify and wire various OpenWrt devices can be found under [Documendtation/Devices](Documentation/Devices).
+**Documentation on how to modify and wire various OpenWrt devices can be found under [Documentation/Devices](Documentation/Devices).**
 
 ### Building the openwrt-testlab
 
