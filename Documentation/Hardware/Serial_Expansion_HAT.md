@@ -23,7 +23,13 @@ One row of GPIO pins is used in connection with each of the attached UARTs.  For
 
 The Linux kernel is hard coded with a maximum of 8 UARTs controlled via connected SC16IS752 chips.  The reason for this limit is not clear and is probably a case of "8 should be enough".  With a small modification to the kernel, this can be easily increased to 16.  A patch can be seen [here](../RaspiOS/0001-sc16is7xx.c-increase-SC16IS7XX_MAX_DEVS-to-16.patch).  For more information about how to compile and install the Linux kernel, please take a look at the documentation at raspberrypi.com page [Installing Raspberry Pi OS](../RaspiOS).
 
-## Device Tree overlay for the SC16IS752
+## Device Tree param and overlay for the SC16IS752
+
+The sc16is752 needs an extra parameter set in ```/boot/firmware/config.txt``` to ensure that there are no FIFO overruns.  Edit the file ```/boot/firmware/config.txt``` and add the following to the end of the file.
+
+```
+dtparam=i2c_arm_baudrate=400000
+```
 
 To install the kernel module for the Serial Expansion HAT, the file ```/boot/firmware/config.txt``` needs to be edited to add the following _(modify the interrupt pin and address as needed)_.  
 
