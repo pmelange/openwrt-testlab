@@ -1,0 +1,23 @@
+{% set baselist = [578, 586, 594, 602, 610] %}
+{% for testdev in range(0, 10) %}
+testdev{{0 if testdev < 9}}{{testdev + 1}}:
+  location: "testdev{{0 if testdev < 9}}{{testdev + 1}}"
+  RawSerialPort:
+    port: "/dev/ttySC{{testdev}}"
+  power:
+    cls: "SysfsGPIO"
+    index: {{ baselist[(testdev/2)|round(0, 'floor')|int] + (testdev%2)  }}
+    invert: True
+  reset:
+    cls: "SysfsGPIO"
+    index: {{ baselist[(testdev/2)|round(0, 'floor')|int] + (testdev%2) +2 }}
+    invert: False
+{% endfor %}
+aux1:
+  SysfsGPIO:
+    index: {{ 512 + 25 }}
+    invert: True
+aux2:
+  SysfsGPIO:
+    index: {{ 512 + 26 }}
+    invert: True
