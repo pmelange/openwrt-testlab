@@ -69,7 +69,7 @@ Now it is time to patch and build a new linux kernel.  The instructions can be f
 sudo apt install git
 git clone --depth=1 https://github.com/raspberrypi/linux
 cd linux
-wget -O /tmp/patch https://github.com/pmelange/openwrt-testlab/blob/main/Documentation/RaspiOS/0001-sc16is7xx.c-increase-SC16IS7XX_MAX_DEVS-to-16.patch
+wget -O /tmp/patch https://raw.githubusercontent.com/pmelange/openwrt-testlab/main/Documentation/RaspiOS/0001-sc16is7xx.c-increase-SC16IS7XX_MAX_DEVS-to-16.patch
 git apply /tmp/patch
 sudo apt install bc bison flex libssl-dev make
 KERNEL=kernel8
