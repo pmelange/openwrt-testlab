@@ -54,6 +54,9 @@ enable_uart=1
 dtparam=strict_gpiod
 dtparam=i2c_arm_baudrate=400000
 
+# turn on aux1 and aux2 per default
+gpio=25,26=op,dl
+
 dtoverlay=sc16is752-i2c,int_pin=20,addr=0x4c
 dtoverlay=sc16is752-i2c,int_pin=21,addr=0x4b
 dtoverlay=sc16is752-i2c,int_pin=22,addr=0x4a
