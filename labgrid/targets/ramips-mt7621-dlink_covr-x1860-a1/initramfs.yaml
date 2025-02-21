@@ -1,0 +1,64 @@
+targets:
+  main:
+    features:
+      - console
+      - wifi
+      - online
+    resources:
+      - RemotePlace:
+          name: port2
+    drivers:
+      - GpioDigitalOutputDriver:
+          name: powerdriver
+          bindings:
+            gpio: power # resouce name
+      - GpioDigitalOutputDriver:
+          name: resetdriver
+          bindings:
+            gpio: reset # resource name
+      - DigitalOutputPowerDriver:
+          bindings:
+            output: powerdriver
+      - DigitalOutputButtonDriver:
+          bindings:
+            output: resetdriver
+      - SerialDriver: {}
+      - ShellDriver:
+          prompt: 'root@[\w()]+:[^ ]+ '
+          login_prompt: Please press Enter to activate this console.
+          await_login_timeout: 30
+          login_timeout: 120
+          post_login_settle_time: 5
+          username: root
+      - OpenwrtUciDriver:
+          name: initialconfig
+          config:
+            network:
+              wan:
+                device: 'ethernet'
+              wan6:
+                device: 'ethernet'
+              "@device[0]": # br-lan
+                - delete: 
+                    ports: 'ethernet'
+                - add: 
+                    ports: 'ethernet.101'
+            system:
+              "@system[0]":
+                hostname: 'testdev02'      
+      - CovrSmallUBootDriver:
+          prompt: '=>'
+          autoboot: 'stop autoboot'
+          boot_expression: 'stop autoboot'
+          boot_secret: 'a'
+          boot_secret_nolf: True
+          interrupt: 'a'
+          init_commands: 
+            - printenv
+            - setenv ipaddr 192.168.0.2 
+            - setenv serverip 192.168.0.1 
+            - tftpboot openwrt-24.10.0-ramips-mt7621-dlink_covr-x1860-a1-initramfs-kernel.bin
+          boot_command: bootm
+      - CovrUBootStrategy: {}
+imports:
+  - ../../openwrt-testlab.py

@@ -1,0 +1,53 @@
+targets:
+  main:
+    features:
+      - console
+      - wifi
+      - online
+    resources:
+      - RemotePlace:
+          name: port2
+    drivers:
+      - GpioDigitalOutputDriver:
+          name: powerdriver
+          bindings:
+            gpio: power # resouce name
+      - GpioDigitalOutputDriver:
+          name: resetdriver
+          bindings:
+            gpio: reset # resource name
+      - DigitalOutputPowerDriver:
+          bindings:
+            output: powerdriver
+      - DigitalOutputButtonDriver:
+          bindings:
+            output: resetdriver
+      - SerialDriver: {}
+      - ShellDriver:
+          prompt: 'root@[\w()]+:[^ ]+ '
+          login_prompt: Please press Enter to activate this console.
+          await_login_timeout: 30
+          login_timeout: 120
+          post_login_settle_time: 5
+          username: root
+      - OpenwrtUciDriver:
+          config:
+            network:
+              wan:
+                device: 'ethernet'
+              wan6:
+                device: 'ethernet'
+              "@device[0]": # br-lan
+                - delete:   # example of add_list/del_list
+                    ports: 'ethernet'
+                - add: 
+                    ports: 'ethernet.101'
+            system:
+              "@system[0]":
+                hostname: 'test'      
+            firewall:
+              "@zone[1]":
+                input: 'ACCEPT'
+      - CovrFlashBootStrategy: {}
+imports:
+  - ../../openwrt-testlab.py
