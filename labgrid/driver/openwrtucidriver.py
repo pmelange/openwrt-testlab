@@ -1,9 +1,10 @@
 import attr
+from time import sleep
 
 from labgrid.factory import target_factory
 from labgrid.util import gen_marker
 from labgrid.step import step
-from labgrid.driver import Driver
+from labgrid.driver import Driver, ShellDriver
 from labgrid.protocol import ConsoleProtocol
 
 @target_factory.reg_driver
@@ -17,7 +18,8 @@ class OpenwrtUciDriver(Driver):
     set, delete.
 
     Args:
-        config (dict): in the following format:
+        config (dict, default={}): a list of uci operations with associated
+        uci dict(s):
 
         config:
           - add:                   # add an unnamed section
@@ -83,9 +85,10 @@ class OpenwrtUciDriver(Driver):
                                   # idx==2 will become idx 1.
     """
     bindings = {
-            "console": ConsoleProtocol,
+#            "console": ConsoleProtocol,
+            "shell": ShellDriver,
     }
-    config = attr.ib(attr.validators.instance_of(dict))
+    config = attr.ib(default=attr.Factor(dict), validator=attr.validators.instance_of(dict))
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
@@ -96,35 +99,67 @@ class OpenwrtUciDriver(Driver):
     def on_deactivate(self):
         pass
 
-    def _add(self, config: str, section_type: str):
+    @Driver.check_active
+    @step(args=['config', 'section_type'])
+    def add(self, config: str, section_type: str):
         cmd = f"""uci add {config} {section_type}"""
-        self.console.sendline(cmd)
+        self.shell.run(cmd)
 
-    def _add_list(self, config: str, section: str, option: str, value: str):
+    @Driver.check_active
+    @step(args=['config', 'section', 'option', 'value'])
+    def add_list(self, config: str, section: str, option: str, value: str):
         cmd = f"""uci add_list {config}.{section}.{option}={value}"""
-        self.console.sendline(cmd)
+        self.shell.run(cmd)
 
-    def _del_list(self, config: str, section: str, option: str, value: str):
+    @Driver.check_active
+    @step(args=['config', 'section', 'option', 'value'])
+    def del_list(self, config: str, section: str, option: str, value: str):
         cmd = f"""uci del_list {config}.{section}.{option}={value}"""
-        self.console.sendline(cmd)
+        self.shell.run(cmd)
+ 
+    @Driver.check_active
+    @step(args=['config', 'section', 'option'])
+    def get(self, config: str, section: str, option: str):
+        return self.shell.run(f"""uci get {config}.{section}.{option}""")
 
-    def _set(self, config: str, section: str, option: str|None, value:str):
+    @Driver.check_active
+    @step(args=['config', 'section', 'option', 'value'])
+    def set(self, config: str, section: str, option: str|None, value:str):
         if option is None:
             # create a new names section, therefore the strange order
             cmd = f"""uci set {config}.{value}={section}"""
         else:
             # set an option value
             cmd = f"""uci set {config}.{section}.{option}={value}"""
-        self.console.sendline(cmd)
+        self.shell.run(cmd)
 
-    def _delete(self, config: str, section: str, option: str|None, idx: int|None):
+    @Driver.check_active
+    @step(args=['config', 'section', 'option', 'idx'])
+    def delete(self, config: str, section: str, option: str|None, idx: int|None):
         if option is None:
             cmd = f"""uci delete {config}.{section}"""
         elif idx is None:
             cmd = f"""uci delete {config}.{section}.{option}"""
         else:
             cmd = f"""uci delete {config}.{section}.{option}={idx}"""
-        self.console.sendline(cmd)
+        self.shell.run(cmd)
+
+    @Driver.check_active
+    @step(args=['config'])
+    def commit(self, config: str = None):
+        if config is not None:
+            cmd = f"""uci commit {config}"""
+        else:
+            cmd = f"""uci commit"""
+        return self.shell.run(cmd)
+
+    @Driver.check_active
+    @step()
+    def reload_config(self):
+        cmd = f"""reload_config"""
+        data, _, errorcode = self.shell.run(cmd)
+        sleep(0.5) # let the system reconfigure before going furthen
+        return (data, [], errorcode)
 
     @Driver.check_active
     @step()
@@ -137,15 +172,15 @@ class OpenwrtUciDriver(Driver):
                     raise ValueError("The action {action} must have a dictionary: {configs}")
                 match action:
                     case "add":
-                        self.add(configs)
+                        self.add_dict(configs)
                     case "add_list":
-                        self.add_list(configs)
+                        self.add_list_dict(configs)
                     case "del_list":
-                        self.del_list(configs)
+                        self.del_list_dict(configs)
                     case "set":
-                        self.set(configs)
+                        self.set_dict(configs)
                     case "delete":
-                        self.delete(configs)
+                        self.delete_dict(configs)
                     case _:
                         raise ValueError("action {action} is not implemented")
         self.commit()
@@ -153,19 +188,19 @@ class OpenwrtUciDriver(Driver):
 
     @Driver.check_active
     @step(args=['configs'])
-    def add(self, configs: dict):
+    def add_dict(self, configs: dict):
         for config, sections in configs.items():
             if isinstance(sections, str):
-                self._add(config, sections)
+                self.add(config, sections)
             elif isinstance(sections, list):
                 for section in sections:
-                    self._add(config, section)
+                    self.add(config, section)
             else:
                 raise ValueError(f"""add: sections must be a list of dictionaries or a dictionary: {configs}""")
 
     @Driver.check_active
     @step(args=['configs'])
-    def add_list(self, configs: dict):
+    def add_list_dict(self, configs: dict):
         for config, sections in configs.items():
             if not isinstance(sections, dict):
                 raise ValueError(f"""add_list: sections must be a dictionary: {configs}""")
@@ -174,16 +209,16 @@ class OpenwrtUciDriver(Driver):
                     raise ValueError(f"""add_list: options must be a dictionary: {configs}""")
                 for option, values in options.items():
                     if isinstance(values, str):
-                        self._add_list(config, section, option, values)
+                        self.add_list(config, section, option, values)
                     elif isinstance(values, list):
                         for value in values:
-                            self._add_list(config, section, option, value)
+                            self.add_list(config, section, option, value)
                     else:
                         raise ValueError(f"""add_list: values must be a string or list: {configs}""")
 
     @Driver.check_active
     @step(args=['configs'])
-    def del_list(self, configs: dict):
+    def del_list_dict(self, configs: dict):
          for config, sections in configs.items():
             if not isinstance(sections, dict):
                 raise ValueError(f"""del_list: sections must be a dictionary: {configs}""")
@@ -192,16 +227,16 @@ class OpenwrtUciDriver(Driver):
                     raise ValueError(f"""del_list: options must be a dictionary: {configs}""")
                 for option, values in options.items():
                     if isinstance(values, str):
-                        self._del_list(config, section, option, values)
+                        self.del_list(config, section, option, values)
                     elif isinstance(values, list):
                         for value in values:
-                            self._del_list(config, section, option, value)
+                            self.del_list(config, section, option, value)
                     else:
                         raise ValueError(f"""del_list: values must be a string or list: {configs}""")
 
     @Driver.check_active
     @step(args=['configs'])
-    def set(self, configs: dict):
+    def set_dict(self, configs: dict):
          for config, sections in configs.items():
             if not isinstance(sections, dict):
                 raise ValueError(f"""set: sections must be dictionary: {configs}""")
@@ -209,35 +244,35 @@ class OpenwrtUciDriver(Driver):
                 if isinstance(options, str):
                     # creating new named section, use options as value
                     value = options
-                    self._set(config, section, None, value)
+                    self.set(config, section, None, value)
                 elif isinstance(options, dict):
                     for option, value in options.items():
-                        self._set(config, section, option, value)
+                        self.set(config, section, option, value)
                 else:
                     raise ValueError(f"""set: options must be a string or a dictionary: {configs}""")
 
     @Driver.check_active
     @step(args=['configs'])
-    def delete(self, configs: dict):
+    def delete_dict(self, configs: dict):
         for config, sections, in configs.items():
             if isinstance(sections, str):
                 # delete an etire secton
-                self._delete(config, sections, None, None)
+                self.delete(config, sections, None, None)
             elif isinstance(sections, dict):
                 for section, options in sections.items():
                     if isinstance(options, str):
                         # delete an option from a section
-                        self._delete(config, section, options, None)
+                        self.delete(config, section, options, None)
                     elif isinstance(options, dict):
                         for option, values in options.items():
                             if isinstance(values, int):
                                 # delete a list option by index
-                                self._delete(config, section, option, values)
+                                self.delete(config, section, option, values)
                             elif isinstance(values, list):
                                 for idx in values:
                                     if isinstance(idx, int):
                                         # delete a list option by index
-                                        self._delete(config, section, option, idx)
+                                        self.delete(config, section, option, idx)
                                     else:
                                         raise ValueError(f"""delete: index must be an integer: {configs}""")
                             else:
@@ -246,18 +281,4 @@ class OpenwrtUciDriver(Driver):
                         raise ValueError(f"""delete: options must be a string or a dictionary: {configs}""")
             else:
                 raise ValueError(f"""delete: sections must be a string or a dictionary: {configs}""")
-
-    @Driver.check_active
-    @step(args=['config'])
-    def commit(self, config: str = None):
-        if config is not None:
-            self.console.sendline(f"""uci commit {config}""")
-        else:
-            self.console.sendline(f"""uci commit""")
-
-    @Driver.check_active
-    @step()
-    def reload_config(self):
-        self.console.sendline(f"""reload_config""")
-
 
