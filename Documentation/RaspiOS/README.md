@@ -34,7 +34,7 @@ To install RaspianOS on an SD Card and configure it, follow these instructions.
   * Set up a hostname under "System Options -> Hostname" for example ```testlab01```
   * Enable I2C under "Interface Options -> I2C"
   * (optional) Enable the Serial Port under "Interface Options -> Serial Port"
-  * (optional) Set the localisation under "Localisation Options -> Locale" to en_US-UTF-8
+  * (optional) Set the localisation under "Localisation Options -> Locale" to en_US-UTF-8 and en_GB.UTF-8 selecting en_US.UTF-8 as the default
   * Set the timezone under "Localisation Options -> Timezone"
   * Exit rapi-config via "Finish" and reboot (you can now remove the network cable)
 
@@ -56,6 +56,30 @@ sudo reboot
 After the reboot, remove old packages
 ```
 auto apt-get autoremove
+```
+
+---
+# Extra Configuration
+
+To configure settings for the attached HATs, take a look at bottom of [boot/firmware/config.txt](boot/firmware/config.txt) to see an example of what needs to be done.  Make sure to enable the dtoverlays for the HATs which are installed on the system.
+
+* ```gpio=...``` may be set to give ceratin gpio pins a default value.  For all options please take a look at [https://www.raspberrypi.com/documentation/computers/config_txt.html#gpio-control](https://www.raspberrypi.com/documentation/computers/config_txt.html#gpio-control) for possible options
+* ```dtparam=i2c_arm_baudrate=400000``` may be set to ensure there are no FIFO overruns on the serial ports (highly recommended)
+* ```dtoverlay=sc16is752-i2c...``` is needed for each Serial Expansion HAT installed on the system.
+
+---
+# Software Packages
+
+The following debian software packages are required: git 
+
+```
+sudo apt-get install git
+```
+
+The following debian softare packages are recommended: vim
+
+```
+sudo apt-get install vim
 ```
 
 ---
