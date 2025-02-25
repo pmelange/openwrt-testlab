@@ -12,3 +12,10 @@ for i in $(seq 1 10); do
 	fi
 	
 done
+
+echo creating aux1
+labgrid-client -p aux1 create
+labgrid-client -p aux1 add-match $(hostname)/aux1/NetworkSysfsGPIO
+echo creating aux2
+labgrid-client -p aux2 create
+labgrid-client -p aux2 add-match $(hostname)/aux2/NetworkSysfsGPIO
