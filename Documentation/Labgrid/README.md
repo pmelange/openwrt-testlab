@@ -37,7 +37,7 @@ sudo usermod -a -G labgrid pi   # change username as needed
 sudo usermod -g labgrid pi      # optional to make labgrid the default group
 ```
 
-* Log out and back in again so that your user is not a member of the labgrid group.
+* Log out and back in again so that your user is now a member of the labgrid group.
 
 * From within the labgrid repo, change to the openwrt-testlab branch and install labgrid
 
@@ -47,6 +47,7 @@ git checkout openwrt-testlab
 source /opt/labgrid-venv/bin/activate
 pip install --upgrade pip
 pip install .
+```
 
 * To set up the tempfiles needed for labgrid, copy the file ```labgrid/contrib/systemd/tmpfiles.d/labgrid.conf``` to ```/etc/tmpfiles.d```. The tempfiles listed in the config file will be created automatically by running ```systemd-tmpfiles --create```.
 
