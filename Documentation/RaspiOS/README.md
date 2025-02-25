@@ -70,10 +70,10 @@ To configure settings for the attached HATs, take a look at bottom of [boot/firm
 ---
 # Software Packages
 
-The following debian software packages are required: git 
+The following debian software packages are required: git dnsmasq
 
 ```
-sudo apt-get install git
+sudo apt-get install git dnsmasq
 ```
 
 The following debian softare packages are recommended: vim
@@ -81,6 +81,8 @@ The following debian softare packages are recommended: vim
 ```
 sudo apt-get install vim
 ```
+
+There are example config files in the Documentataion/RaspiOS/etc directoy.  Modify and copy those files as needed.  Afterwards, restart the services as necessary.
 
 ---
 # The Linux Kernel
