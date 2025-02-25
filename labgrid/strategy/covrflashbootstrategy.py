@@ -53,9 +53,22 @@ class CovrFlashBootStrategy(Strategy):
             self.target.activate(self.shell)
             self.shell.run("uptime; uname -a")
         elif status == Status.config:
+            print(self)
             self.transition(Status.shell)
             self.target.activate(self.config)
             self.config.configure()
+            self.config.set_dict({'test': {'withaname': {'stratoption': 'hello'}}})
+            community, _, exitcode = self.config.get('wireless', 'default_radio1', 'ssid')
+            if exitcode != 0:
+                print(f"""Something terrible has happened {community}""")
+            else:
+                print(f"""community is {community}""")
+            self.config.set('system', '@system[0]', 'hostname', 'port02')
+            self.config.config=[{'set':{'test': {'withaname': {'sillyopt': 'value' }}}},
+                                {'delete': {'test': '@device[0]'}}]
+            self.config.configure()
+            self.config.commit()
+            self.config.reload_config()
             self.target.deactivate(self.config)
         else:
             raise StrategyError(f"no transition found from {self.status} to {status}")
