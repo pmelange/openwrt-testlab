@@ -4,6 +4,7 @@
 
 import argparse
 import json
+import logging
 from argparse import RawTextHelpFormatter
 from time import sleep
 
@@ -14,7 +15,7 @@ from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import Select
 
-luci_webaddress = "https://192.168.42.1"
+luci_webaddress = "https://192.168.0.127"
 luci_timeout_long = 12
 luci_timeout = 2
 
@@ -144,6 +145,11 @@ def click_next(browser):
 
 display = Display(visible=0, size=(1280, 720))
 display.start()
+
+
+logger = logging.getLogger('selenium')
+logger.setLevel(logging.DEBUG)
+
 
 profile = FirefoxProfile()
 profile.set_preference("intl.accept_languages", "de-DE")
