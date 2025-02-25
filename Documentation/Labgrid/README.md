@@ -67,3 +67,9 @@ sudo systemctl start labgrid-coordinator
 sudo systemctl start labgrid-exporter
 ```
 
+* Create the labgrid places with the script openwrt-testlab/Documentation/RaspiOS/create-places.sh.  Modify the file as necessary, such as the range in the for loop, depending on how many ports are on the system.
+
+```
+openwrt-testlab/Documentation/RaspiOS/create-places.sh
+```
+
