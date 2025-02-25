@@ -32,14 +32,14 @@ sudo systemd-sysusers
 ```
 cd /opt
 sudo chown -R labgrid:labgrid labgrid-venv
-sudo chmod g+w labgrid-venv
+sudo chmod -R g+w labgrid-venv
 sudo usermod -a -G labgrid pi   # change username as needed
-
+sudo usermod -g labgrid pi      # optional to make labgrid the default group
 ```
 
 * Log out and back in again so that your user is not a member of the labgrid group.
 
-* Install labgrid
+* From within the labgrid repo, change to the openwrt-testlab branch and install labgrid
 
 ```
 cd ~/labgrid
