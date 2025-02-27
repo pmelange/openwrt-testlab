@@ -56,6 +56,14 @@ sudo cp labgrid/contrib/systemd/tmpfiles.d/labgrid.conf /etc/tmpfiles.d/
 sudo systemd-tmpfiles --create
 ```
 
+* set up the TFTP directory so that the labgrid group has write permissions
+
+```
+cd /srv
+sudo chgrp labgrid tftp
+sudo chmod g+w tftp
+```
+
 * Add the coordinator and exporter services to systemd by copying the files ```labgrid/conrib/systemd/labgrid*service``` to ```/etc/systemd/system``` and enabling the services.  Modify the service files as needed.  In this example, the labgrid-venv directory is located in /opt/labgrid-venv.  In addition, use ```systemctl edit labgrid-exporter.service``` as described in the labgrid documentation.
 
 ```
