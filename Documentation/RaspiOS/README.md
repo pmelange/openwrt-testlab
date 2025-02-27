@@ -70,10 +70,10 @@ To configure settings for the attached HATs, take a look at bottom of [boot/firm
 ---
 # Software Packages
 
-The following debian software packages are required: git dnsmasq ser2net microcom
+The following debian software packages are required: ifupdown git dnsmasq ser2net microcom
 
 ```
-sudo apt-get install git dnsmasq ser2net microcom
+sudo apt-get install ifupdown git dnsmasq ser2net microcom
 ```
 
 The following debian softare packages are recommended: vim
