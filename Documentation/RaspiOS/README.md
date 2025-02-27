@@ -70,10 +70,10 @@ To configure settings for the attached HATs, take a look at bottom of [boot/firm
 ---
 # Software Packages
 
-The following debian software packages are required: ifupdown git dnsmasq ser2net microcom
+The following debian software packages are required: ifupdown git dnsmasq ser2net microcom chromium-codecs-ffmpeg chromium-browser chromium-driver
 
 ```
-sudo apt-get install ifupdown git dnsmasq ser2net microcom
+sudo apt-get install ifupdown git dnsmasq ser2net microcom chromium-codecs-ffmpeg chromium-browser chromium-driver
 ```
 
 The following debian softare packages are recommended: vim
