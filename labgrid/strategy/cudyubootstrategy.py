@@ -1,6 +1,7 @@
 import enum
 
 import attr
+from time import sleep
 
 from labgrid.factory import target_factory
 from labgrid.strategy import Strategy, StrategyError
@@ -16,11 +17,11 @@ class Status(enum.Enum):
 
 @target_factory.reg_driver
 @attr.s(eq=False)
-class CovrUBootStrategy(Strategy):
-    """CovrUbootStrategy - Strategy to switch to uboot or shell"""
+class CudyUBootStrategy(Strategy):
+    """CudyUbootStrategy - Strategy to switch to uboot or shell"""
     bindings = {
         "power": "PowerProtocol",
-        'reset': "ButtonProtocol",
+        'reset': "ButtonProtocol", # used by CodySmallUBootDriver
         "console": "ConsoleProtocol",
         "uboot": "UBootDriver",
         "shell": "ShellDriver",

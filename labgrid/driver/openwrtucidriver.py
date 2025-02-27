@@ -84,36 +84,58 @@ class OpenwrtUciDriver(Driver):
                     - 1           # warning, when deleteing idx 1, then
                                   # idx==2 will become idx 1.
 
-    Example:a - setting up a router to use a single port with VLAN tagging for
-    lan, untagged for wan and wan6. Set a different IP on lan and a hostname.
+    Example: - setting up a router to use a single port (lan1) with VLAN
+    tagging for lan, untagged for wan and wan6. Set a different IP on lan
+    and a hostname.
 
         OpenwrtUciDriver:
           config:
             - set:
                 network:
                   wan:
-                    device: 'lan1' # device connected to lan1
+                    device: 'br-switch0.5'
                   wan6:
-                    device: 'lan1'
+                    device: 'br-switch0.5'
                   lan:
-                    ipaddr: '192.168.102.1'
+                    ipaddr: '192.168.101.1'
+                    device: 'br-switch0.101'
+                  "@device[0]":
+                    name: 'br-switch0'
                 system:
                   "@system[0]":
                     hostname: 'testdev01'
-            - del_list:
-                network:
-                  "@device[0]": # br-lan
-                    ports: 'lan1'
             - add_list:
                 network:
                   "@device[0]":
-                    ports: 'lan1.101'
-                    ports: 'wan' # put the wan port into the lan bridge
-
+                    ports: 'wan'
+            - add:
+                network: 'bridge-vlan'
+            - set:
+                network:
+                  "@bridge-vlan[0]":
+                    device: 'br-switch0'
+                    vlan: '101'
+            - add_list:
+                network:
+                  "@bridge-vlan[0]":
+                    ports:
+                      - 'lan1:t'
+                      - 'lan2:u'
+                      - 'lan3:u'
+                      - 'wan:u'
+            - add:
+                network: 'bridge-vlan'
+            - set:
+                network:
+                  "@bridge-vlan[1]":
+                    device: 'br-switch0'
+                    vlan: '5'
+            - add_list:
+                network:
+                  "@bridge-vlan[1]":
+                    ports: 'lan1:u'
     """
-    bindings = {
-            "shell": ShellDriver,
-    }
+    bindings = { "shell": ShellDriver, }
     config = attr.ib(default=attr.Factory(list), validator=attr.validators.instance_of(list))
     auto_commit = attr.ib(default=True, validator=attr.validators.instance_of(bool))
     auto_reload = attr.ib(default=True, validator=attr.validators.instance_of(bool))

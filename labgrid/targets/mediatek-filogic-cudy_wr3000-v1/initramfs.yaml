@@ -1,0 +1,93 @@
+targets:
+  main:
+    features:
+      - console
+      - wifi
+      - online
+    resources:
+      - RemotePlace:
+          name: port1
+    drivers:
+      - GpioDigitalOutputDriver:
+          name: powerdriver
+          bindings:
+            gpio: power # resouce name
+      - GpioDigitalOutputDriver:
+          name: resetdriver
+          bindings:
+            gpio: reset # resource name
+      - DigitalOutputPowerDriver:
+          bindings:
+            output: powerdriver
+      - DigitalOutputButtonDriver:
+          bindings:
+            output: resetdriver
+      - SerialDriver: {}
+      - ShellDriver:
+          prompt: 'root@[\w()]+:[^ ]+ '
+          login_prompt: Please press Enter to activate this console.
+          await_login_timeout: 30
+          login_timeout: 120
+          post_login_settle_time: 5
+          username: root
+      - OpenwrtUciDriver:
+          config:
+            - set:
+                network:
+                  wan:
+                    device: 'br-switch0.5'
+                  wan6:
+                    device: 'br-switch0.5'
+                  lan:
+                    ipaddr: '192.168.101.1'
+                    device: 'br-switch0.101'
+                  "@device[0]":
+                    name: 'br-switch0'
+                system:
+                  "@system[0]":
+                    hostname: 'testdev01'
+            - add_list:
+                network:
+                  "@device[0]":
+                    ports: 'wan'
+            - add:
+                network: 'bridge-vlan'
+            - set:
+                network:
+                  "@bridge-vlan[0]":
+                    device: 'br-switch0'
+                    vlan: '101'
+            - add_list:
+                network:
+                  "@bridge-vlan[0]":
+                    ports:
+                      - 'lan1:t'
+                      - 'lan2:u'
+                      - 'lan3:u'
+                      - 'wan:u'
+            - add:
+                network: 'bridge-vlan'
+            - set:
+                network:
+                  "@bridge-vlan[1]":
+                    device: 'br-switch0'
+                    vlan: '5'
+            - add_list:
+                network:
+                  "@bridge-vlan[1]":
+                    ports: 'lan1:u'
+      - CudySmallUBootDriver:
+          prompt: 'MT7981>'
+            #autoboot: 'Loading:'
+          boot_expression: 'Loading:'
+          boot_secret: '\x03'
+          boot_secret_nolf: True
+            #interrupt: \\x03
+          init_commands: 
+            - setenv ipaddr 192.168.0.2 
+            - setenv serverip 192.168.0.1 
+            - tftpboot openwrt-24.10.0-mediatek-filogic-cudy_wr3000-v1-initramfs-kernel.bin
+          boot_command: bootm
+      - CudyUBootStrategy: {}
+imports:
+  - ../../openwrt-testlab.py

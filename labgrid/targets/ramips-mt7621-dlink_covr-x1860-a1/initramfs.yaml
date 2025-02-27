@@ -31,21 +31,26 @@ targets:
           post_login_settle_time: 5
           username: root
       - OpenwrtUciDriver:
-          name: initialconfig
           config:
-            network:
-              wan:
-                device: 'ethernet'
-              wan6:
-                device: 'ethernet'
-              "@device[0]": # br-lan
-                - delete: 
+            - set:
+                network:
+                  wan:
+                    device: 'ethernet'
+                  wan6:
+                    device: 'ethernet'
+                  lan:
+                    ipaddr: '192.168.102.1'
+                system:
+                  "@system[0]":
+                    hostname: 'testdev02'
+            - del_list:
+                network:
+                  "@device[0]": # br-lan
                     ports: 'ethernet'
-                - add: 
-                    ports: 'ethernet.101'
-            system:
-              "@system[0]":
-                hostname: 'testdev02'      
+            - add_list:
+                network:
+                  "@device[0]":
+                    ports: 'ethernet.102'
       - CovrSmallUBootDriver:
           prompt: '=>'
           autoboot: 'stop autoboot'
