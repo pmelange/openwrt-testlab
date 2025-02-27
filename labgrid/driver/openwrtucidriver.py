@@ -83,12 +83,40 @@ class OpenwrtUciDriver(Driver):
                     - 2           # delete multiple list options by index
                     - 1           # warning, when deleteing idx 1, then
                                   # idx==2 will become idx 1.
+
+    Example:a - setting up a router to use a single port with VLAN tagging for
+    lan, untagged for wan and wan6. Set a different IP on lan and a hostname.
+
+        OpenwrtUciDriver:
+          config:
+            - set:
+                network:
+                  wan:
+                    device: 'lan1' # device connected to lan1
+                  wan6:
+                    device: 'lan1'
+                  lan:
+                    ipaddr: '192.168.102.1'
+                system:
+                  "@system[0]":
+                    hostname: 'testdev01'
+            - del_list:
+                network:
+                  "@device[0]": # br-lan
+                    ports: 'lan1'
+            - add_list:
+                network:
+                  "@device[0]":
+                    ports: 'lan1.101'
+                    ports: 'wan' # put the wan port into the lan bridge
+
     """
     bindings = {
-#            "console": ConsoleProtocol,
             "shell": ShellDriver,
     }
-    config = attr.ib(default=attr.Factor(dict), validator=attr.validators.instance_of(dict))
+    config = attr.ib(default=attr.Factory(list), validator=attr.validators.instance_of(list))
+    auto_commit = attr.ib(default=True, validator=attr.validators.instance_of(bool))
+    auto_reload = attr.ib(default=True, validator=attr.validators.instance_of(bool))
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
