@@ -76,6 +76,14 @@ sudo systemctl start labgrid-coordinator
 sudo systemctl start labgrid-exporter
 ```
 
+* Configure and enable nftables
+
+```
+sudo cp openwrt-testlab/Documentation/RaspiOS/etc/nftables.conf /etc
+sudo systemctl enable nftables.service
+sudo systemctl start nftables.service
+```
+
 * Create the labgrid places with the script openwrt-testlab/Documentation/RaspiOS/create-places.sh.  Modify the file as necessary, such as the range in the for loop, depending on how many ports are on the system.
 
 ```
