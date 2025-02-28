@@ -5,6 +5,7 @@ import attr
 from labgrid.factory import target_factory
 from labgrid.strategy import Strategy, StrategyError
 
+from time import sleep
 
 class Status(enum.Enum):
     unknown = 0
@@ -16,8 +17,8 @@ class Status(enum.Enum):
 
 @target_factory.reg_driver
 @attr.s(eq=False)
-class CovrFlashBootStrategy(Strategy):
-    """CovrFlashBootStrategy - Strategy to switch to boot from flash or shell"""
+class OpenwrtFlashBootStrategy(Strategy):
+    """OpenwrtFlashBootStrategy - Strategy to boot from flash"""
     bindings = {
         "power": "PowerProtocol",
         'reset': "ButtonProtocol",
@@ -52,23 +53,20 @@ class CovrFlashBootStrategy(Strategy):
             self.transition(Status.on)
             self.target.activate(self.shell)
             self.shell.run("uptime; uname -a")
+            # wait for there to be a logfile to read
+            _, _, errorcode = self.shell.run("ubus -t 10 wait_for log")
+            while errorcode != 0:
+                _, _, errorcode = self.shell.run("ubus -t 10 wait_for log")
+            # wait until init is complete
+            _, _, errorcode = self.shell.run("logread -l 100 | grep init\ complete")
+            while errorcode != 0:
+                sleep(5)
+                _, _, errorcode = self.shell.run("logread -l 100 | grep init\ complete")
         elif status == Status.config:
             print(self)
             self.transition(Status.shell)
             self.target.activate(self.config)
             self.config.configure()
-            self.config.set_dict({'test': {'withaname': {'stratoption': 'hello'}}})
-            community, _, exitcode = self.config.get('wireless', 'default_radio1', 'ssid')
-            if exitcode != 0:
-                print(f"""Something terrible has happened {community}""")
-            else:
-                print(f"""community is {community}""")
-            self.config.set('system', '@system[0]', 'hostname', 'port02')
-            self.config.config=[{'set':{'test': {'withaname': {'sillyopt': 'value' }}}},
-                                {'delete': {'test': '@device[0]'}}]
-            self.config.configure()
-            self.config.commit()
-            self.config.reload_config()
             self.target.deactivate(self.config)
         else:
             raise StrategyError(f"no transition found from {self.status} to {status}")

@@ -6,7 +6,7 @@ targets:
       - online
     resources:
       - RemotePlace:
-          name: port2
+          name: port1
     drivers:
       - GpioDigitalOutputDriver:
           name: powerdriver
@@ -24,7 +24,7 @@ targets:
             output: resetdriver
       - SerialDriver: {}
       - ShellDriver:
-          prompt: 'root@[\w-()]+:[^ ]+ '
+          prompt: 'root@[\w()]+:[^ ]+ '
           login_prompt: Please press Enter to activate this console.
           await_login_timeout: 30
           login_timeout: 120
@@ -35,22 +35,14 @@ targets:
             - set:
                 network:
                   lan:
-                    ipaddr: '192.168.102.1'
+                    ipaddr: '192.168.101.1'
                 system:
                   "@system[0]":
-                    hostname: 'testdev02'
-            - del_list:
-                network:
-                  "@device[0]":
-                    ports: 'ethernet'
-                  "@device[3]":
-                    ports: 'internet'
+                    hostname: 'testdev01'
             - add_list:
                 network:
-                  "@device[0]":
-                    ports: ['ethernet.102', 'internet']
-                  "@device[3]":
-                    ports: 'ethernet'
+                  "@device[0]": # br-lan
+                    ports: 'wan.101'
       - OpenwrtFlashBootStrategy: {}
 imports:
   - ../../openwrt-testlab.py
