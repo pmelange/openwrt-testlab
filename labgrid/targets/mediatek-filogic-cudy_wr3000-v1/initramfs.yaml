@@ -45,11 +45,9 @@ targets:
                     ports: 'wan.101'
       - CudySmallUBootDriver:
           prompt: 'MT7981>'
-            #autoboot: 'Loading:'
           boot_expression: 'Loading:'
           boot_secret: '\x03'
           boot_secret_nolf: True
-            #interrupt: \\x03
           init_commands: 
             - setenv ipaddr 192.168.0.2 
             - setenv serverip 192.168.0.1 
