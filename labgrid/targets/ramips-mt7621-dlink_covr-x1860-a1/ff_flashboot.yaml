@@ -24,7 +24,7 @@ targets:
             output: resetdriver
       - SerialDriver: {}
       - ShellDriver:
-          prompt: 'root@[\w-()]+:[^ ]+ '
+          prompt: 'root@[-\w()]+:[^ ]+ '
           login_prompt: Please press Enter to activate this console.
           await_login_timeout: 30
           login_timeout: 120
@@ -36,9 +36,6 @@ targets:
                 network:
                   lan:
                     ipaddr: '192.168.102.1'
-                system:
-                  "@system[0]":
-                    hostname: 'testdev02'
             - del_list:
                 network:
                   "@device[0]":
@@ -51,6 +48,29 @@ targets:
                     ports: ['ethernet.102', 'internet']
                   "@device[3]":
                     ports: 'ethernet'
+      - OpenwrtLuCIDriver: {}
+      - FreifunkWizardDriver:
+          address: "192.168.102.1"
+          password: "abc123"
+          network: "Freifunk Berlin"
+          hostname: "testdev02"
+          nickname: "testlabuser"
+          realname: "openwrt-testlab"
+          email: "email@address"
+          location: "Panoramastrasse 1A, 10178 Berlin"
+          lat: "52.52081970085464"
+          lon: "13.409418231737128"
+          alt: "368"
+          sharedInternet: True
+          bw_down: "60"
+          bw_up: "20"
+          stats: True
+          meship_radio0: "10.0.102.1"
+          meshmode_radio0: "adhoc"
+          meship_radio1: "10.0.102.2"
+          meshmode_radio1: "adhoc"
+          ssid: "testdev02.berlin.freifunk.net"
+          dhcp: "192.168.102.0/24"
       - OpenwrtFlashBootStrategy: {}
 imports:
   - ../../openwrt-testlab.py

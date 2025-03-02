@@ -10,3 +10,5 @@ from strategy.cudyubootstrategy import CudyUBootStrategy
 from driver.covrubootdriver import CovrSmallUBootDriver
 from driver.cudyubootdriver import CudySmallUBootDriver
 from driver.openwrtucidriver import OpenwrtUciDriver
+from driver.openwrtlucidriver import OpenwrtLuCIDriver
+from driver.freifunkwizarddriver import FreifunkWizardDriver
