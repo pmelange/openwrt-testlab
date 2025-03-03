@@ -12,8 +12,9 @@ class Status(enum.Enum):
     off = 1
     on = 2
     shell = 3
-    initialconfig = 4
+    wait_init = 4
     config = 5
+    ffwizard = 6
 
 @target_factory.reg_driver
 @attr.s(eq=False)
@@ -55,6 +56,8 @@ class OpenwrtFlashBootStrategy(Strategy):
             self.transition(Status.on)
             self.target.activate(self.shell)
             self.shell.run("uptime; uname -a")
+        elif status == Status.wait_init:
+            self.transition(Status.shell)
             # wait for there to be a logfile to read
             _, _, errorcode = self.shell.run("ubus -t 10 wait_for log")
             while errorcode != 0:
@@ -65,11 +68,12 @@ class OpenwrtFlashBootStrategy(Strategy):
                 sleep(5)
                 _, _, errorcode = self.shell.run("logread -l 100 | grep init\ complete")
         elif status == Status.config:
-            print(self)
-            self.transition(Status.shell)
+            self.transition(Status.wait_init)
             self.target.activate(self.config)
             self.config.configure()
             self.target.deactivate(self.config)
+        elif status == Status.ffwizard:
+            self.transition(Status.config)
             self.target.activate(self.ffwizard)
             self.ffwizard.configure()
             self.target.deactivate(self.ffwizard)
@@ -81,11 +85,17 @@ class OpenwrtFlashBootStrategy(Strategy):
         if not isinstance(status, Status):
             status = Status[status]
         if status == Status.off:
-            self.target.activate(self.power)
+            self.target.activate(self.off)
         elif status == Status.on:
             self.target.activate(self.on)
         elif status == Status.shell:
             self.target.activate(self.shell)
+        elif status == Status.wait_init:
+            self.target.activate(self.wait_init)
+        elif status == Status.config:
+            self.target.activate(self.config)
+        elif status == Status.ffwizard:
+            self.target.activate(self.ffwizard)
         else:
             raise StrategyError("can not force state {}".format(status))
         self.status = status
