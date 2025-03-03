@@ -1,6 +1,7 @@
 import attr
 from time import sleep
 from urllib.parse import urlsplit
+import shutil
 
 from labgrid.factory import target_factory
 from labgrid.util import gen_marker
@@ -41,7 +42,10 @@ class OpenwrtLuCIDriver(Driver):
         self._options = Options()
         self._options.add_argument("--headless=new")
         self._options.accept_insecure_certs = True
-        self._options.binary_location = "/usr/bin/chromium-browser"
+        location = shutil.which("chromium-browser")
+        if location is None:
+            location = shutil.which("chromium")
+        self._options.binary_location = location
 
         self._browser = webdriver.Chrome(service=self._service, 
                                          options=self._options)
