@@ -1,10 +1,14 @@
 import attr
 from time import sleep
+from urllib.parse import urlsplit
 
 from labgrid.factory import target_factory
 from labgrid.util import gen_marker
+from labgrid.util.proxy import proxymanager
+from labgrid.util.ssh import sshmanager
 from labgrid.step import step
 from labgrid.driver import Driver
+from labgrid.resource import NetworkSerialPort
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -19,13 +23,19 @@ class OpenwrtLuCIDriver(Driver):
     OpenwrtLuCIDriver is meant as a driver to change settings via the
     web interface.
     """
-    bindings = {}
+    bindings = {
+            "serial": NetworkSerialPort,
+            }
     find_element_retries = attr.ib(default=2, validator=attr.validators.instance_of(int))
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
+        self._url = None
+        self._forwarder = None
 
     def on_activate(self):
+        self._remotehost, _ = proxymanager.get_host_and_port(self.serial)
+
         self._service = Service(executable_path='/usr/bin/chromedriver')
 
         self._options = Options()
@@ -38,8 +48,10 @@ class OpenwrtLuCIDriver(Driver):
         self._browser.implicitly_wait(5)
 
     def on_deactivate(self):
+ #       self._remove_forward()
         self._browser.close()
         self._browser.quit()
+        self._browser = None
 
     @step(args=['form_element', 'optional', 'by'])
     def _get_elements(self, form_element, optional, by=By.NAME):
@@ -88,8 +100,24 @@ class OpenwrtLuCIDriver(Driver):
     @Driver.check_active
     @step(args=['url'])
     def get(self, url):
+        if self._forwarder is not None:
+            sshmanager.remove_forward(
+                self._remotehost,
+                self._urlparts.hostname,
+                self._port
+                )
+            self._forwarder = None
+
         self._url = url
-        self._browser.get(url)
+        self._urlparts = urlsplit(self._url)
+        self._port = 443 if self._urlparts.scheme == "https" else 80
+        proxy_port = sshmanager.request_forward(
+                self._remotehost,
+                self._urlparts.hostname,
+                self._port
+                )
+        self._forwarder=f"""{self._urlparts.scheme}://localhost:{proxy_port}"""
+        self._browser.get(self._forwarder)
 
     @Driver.check_active
     @step(args=['submit_element'])
