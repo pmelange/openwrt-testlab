@@ -15,6 +15,7 @@ class Status(enum.Enum):
     wait_init = 4
     config = 5
     ffwizard = 6
+    putfile = 7
 
 @target_factory.reg_driver
 @attr.s(eq=False)
@@ -28,6 +29,7 @@ class OpenwrtFlashBootStrategy(Strategy):
         "config": "OpenwrtUciDriver",
         "luci": "OpenwrtLuCIDriver",
         "ffwizard": "FreifunkWizardDriver",
+        "ssh": "SSHDriver",
     }
 
     status = attr.ib(default=Status.unknown)
@@ -67,6 +69,8 @@ class OpenwrtFlashBootStrategy(Strategy):
             while errorcode != 0:
                 sleep(5)
                 _, _, errorcode = self.shell.run("logread -l 100 | grep init\ complete")
+            #self.shell.put("/home/pi/.ssh/id_rsa.pub", "/etc/dropbear")
+            self.shell.run("cp ~/.ssh/authorized_keys /etc/dropbear")
         elif status == Status.config:
             self.transition(Status.wait_init)
             self.target.activate(self.config)
@@ -77,6 +81,13 @@ class OpenwrtFlashBootStrategy(Strategy):
             self.target.activate(self.ffwizard)
             self.ffwizard.configure()
             self.target.deactivate(self.ffwizard)
+            self.target.deactivate(self.shell)
+            self.target.activate(self.shell)
+        elif status == Status.putfile:
+            self.transition(Status.config)
+            self.target.activate(self.ssh)
+            self.ssh.put("/srv/tftp/uImage","/tmp")
+            self.target.deactivate(self.ssh)
         else:
             raise StrategyError(f"no transition found from {self.status} to {status}")
         self.status = status
@@ -96,6 +107,8 @@ class OpenwrtFlashBootStrategy(Strategy):
             self.target.activate(self.config)
         elif status == Status.ffwizard:
             self.target.activate(self.ffwizard)
+        elif status == Status.putfile:
+            self.target.activate(self.putfile)
         else:
             raise StrategyError("can not force state {}".format(status))
         self.status = status

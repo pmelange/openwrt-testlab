@@ -30,6 +30,7 @@ targets:
           login_timeout: 120
           post_login_settle_time: 5
           username: root
+          keyfile: "~/.ssh/id_rsa.pub"
       - OpenwrtUciDriver:
           config:
             - set:
@@ -71,6 +72,8 @@ targets:
           meshmode_radio1: "adhoc"
           ssid: "testdev02.berlin.freifunk.net"
           dhcp: "192.168.102.0/24"
+      - SSHDriver:
+          explicit_scp_mode: True
       - OpenwrtFlashBootStrategy: {}
 imports:
   - ../../openwrt-testlab.py
