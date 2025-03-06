@@ -59,6 +59,23 @@ auto apt-get autoremove
 ```
 
 ---
+# Network Configuration
+
+Labgrid uses NetworkManager, so to set up the networking the following may be good to do:
+
+* Create a network for the WAN ports of the attached openwrt test devices. Note, you may need to delete any existing NetworkManager connections configured for eth0 with something similar to ```sudo nmcli con delete con-name "Wired connection1"```
+```
+sudo nmcli con add con-name eth0 ifname eth0 type ethernet ip4 192.168.0.1/24
+```
+
+* Create interfaces for each attached openwrt test device which will get an IP address from the test device's LAN.  Repeat this (from eth0.101 to eth0.110) for each attached test device
+```
+sudo nmcli con add type vlan con-name eth0.101 ifname eth0.101 dev eth0 id 101 ipv4.route-metric 1000 ipv4.ignore-auto-dns True connection.autoconnect-retries 0
+```
+
+* Install and configure dnsmasq
+
+---
 # Extra Configuration
 
 To configure settings for the attached HATs, take a look at bottom of [boot/firmware/config.txt](boot/firmware/config.txt) to see an example of what needs to be done.  Make sure to enable the dtoverlays for the HATs which are installed on the system.
