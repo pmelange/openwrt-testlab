@@ -8,7 +8,7 @@ StartLimitIntervalSec=0
 Environment="PYTHONUNBUFFERED=1"
 # Should contain LG_COORDINATOR configuration
 EnvironmentFile=-/etc/environment
-ExecStart=/opt/labgrid-venv/bin/labgrid-exporter /etc/labgrid/exporter.yaml
+ExecStart=/opt/labgrid-venv/bin/labgrid-exporter -i /etc/labgrid/exporter.yaml
 Restart=always
 RestartSec=30
 DynamicUser=yes
