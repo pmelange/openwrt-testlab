@@ -4,6 +4,7 @@ import attr
 
 from labgrid.factory import target_factory
 from labgrid.strategy import Strategy, StrategyError
+from labgrid.util.ssh import sshmanager
 
 from time import sleep
 
@@ -15,7 +16,9 @@ class Status(enum.Enum):
     wait_init = 4
     config = 5
     ffwizard = 6
-    putfile = 7
+    netup = 7
+    netdown = 8
+    putfile = 9
 
 @target_factory.reg_driver
 @attr.s(eq=False)
@@ -27,9 +30,10 @@ class OpenwrtFlashBootStrategy(Strategy):
         "console": "ConsoleProtocol",
         "shell": "ShellDriver",
         "config": "OpenwrtUciDriver",
-        "luci": "OpenwrtLuCIDriver",
+#        "luci": "OpenwrtLuCIDriver",
         "ffwizard": "FreifunkWizardDriver",
         "ssh": "SSHDriver",
+        "net": "NetworkInterfaceDriver",
     }
 
     status = attr.ib(default=Status.unknown)
@@ -40,24 +44,31 @@ class OpenwrtFlashBootStrategy(Strategy):
     def transition(self, status):
         if not isinstance(status, Status):
             status = Status[status]
+        
         if status == Status.unknown:
             raise StrategyError(f"can not transition to {status}")
+        
         elif status == self.status:
             return # nothing to do
+        
         elif status == Status.off:
             self.target.deactivate(self.console)
             self.target.activate(self.power)
             self.power.off()
+            self.transition(Status.netdown)
+        
         elif status == Status.on:
             self.transition(Status.off)
             self.target.activate(self.console)
             # cycle power
             self.power.cycle()
+        
         elif status == Status.shell:
             # transition to on
             self.transition(Status.on)
             self.target.activate(self.shell)
             self.shell.run("uptime; uname -a")
+        
         elif status == Status.wait_init:
             self.transition(Status.shell)
             # wait for there to be a logfile to read
@@ -69,27 +80,40 @@ class OpenwrtFlashBootStrategy(Strategy):
             while errorcode != 0:
                 sleep(5)
                 _, _, errorcode = self.shell.run("logread -l 100 | grep init\ complete")
-            #self.shell.put("/home/pi/.ssh/id_rsa.pub", "/etc/dropbear")
             self.shell.run("cp ~/.ssh/authorized_keys /etc/dropbear")
+        
         elif status == Status.config:
             self.transition(Status.wait_init)
             self.target.activate(self.config)
             self.config.configure()
             self.target.deactivate(self.config)
+        
         elif status == Status.ffwizard:
             self.transition(Status.config)
+            self.transition(Status.netup)
             self.target.activate(self.ffwizard)
             self.ffwizard.configure()
             self.target.deactivate(self.ffwizard)
             self.target.deactivate(self.shell)
             self.target.activate(self.shell)
+        
+        elif status == Status.netup:
+            self.target.activate(self.net)
+            sshmanager.get(self.net.iface.host).run(f"""sudo ifup {self.net.iface.ifname}""")
+
+        elif status == Status.netdown:
+            self.target.activate(self.net)
+            sshmanager.get(self.net.iface.host).run(f"""sudo ifdown {self.net.iface.ifname}""")
+        
         elif status == Status.putfile:
             self.transition(Status.config)
             self.target.activate(self.ssh)
             self.ssh.put("/srv/tftp/uImage","/tmp")
             self.target.deactivate(self.ssh)
+        
         else:
             raise StrategyError(f"no transition found from {self.status} to {status}")
+        
         self.status = status
 
     def force(self, status):
