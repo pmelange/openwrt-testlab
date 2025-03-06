@@ -12,6 +12,11 @@ testdev{{0 if testdev < 9}}{{testdev + 1}}:
     cls: "SysfsGPIO"
     index: {{ baselist[(testdev/2)|round(0, 'floor')|int] + (testdev%2) +2 }}
     invert: False
+  NetworkInterface:
+    ifname: "eth0.2{{0 if testdev < 9}}{{testdev + 1}}"
+  NetworkService:
+    address: "192.168.1{{0 if testdev<9}}{{testdev + 1}}.1"
+    username: root
 {% endfor %}
 aux1:
   SysfsGPIO:
