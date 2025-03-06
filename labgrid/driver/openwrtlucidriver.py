@@ -35,7 +35,7 @@ class OpenwrtLuCIDriver(Driver):
         self._forwarder = None
 
     def on_activate(self):
-        self._remotehost, _ = proxymanager.get_host_and_port(self.serial)
+        self._remotehost = self.serial.host
 
         self._service = Service(executable_path='/usr/bin/chromedriver')
 
@@ -120,6 +120,7 @@ class OpenwrtLuCIDriver(Driver):
                 self._urlparts.hostname,
                 self._port
                 )
+        print(f"""remote {self._remotehost} hostname {self._urlparts.hostname} port {self._port} proxyport {proxy_port}""")
         self._forwarder=f"""{self._urlparts.scheme}://localhost:{proxy_port}"""
         self._browser.get(self._forwarder)
 
