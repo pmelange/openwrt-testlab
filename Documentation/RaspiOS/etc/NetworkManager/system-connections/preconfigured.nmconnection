@@ -1,0 +1,14 @@
+[connection]
+id=preconfigured
+uuid=b634fc9b-158f-47cd-9314-29a30131571c
+type=wifi
+[wifi]
+mode=infrastructure
+ssid=berlin.freifunk.net
+hidden=false
+[ipv4]
+method=auto
+[ipv6]
+addr-gen-mode=default
+method=auto
+[proxy]
