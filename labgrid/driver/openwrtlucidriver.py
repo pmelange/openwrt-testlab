@@ -120,7 +120,6 @@ class OpenwrtLuCIDriver(Driver):
                 self._urlparts.hostname,
                 self._port
                 )
-        print(f"""remote {self._remotehost} hostname {self._urlparts.hostname} port {self._port} proxyport {proxy_port}""")
         self._forwarder=f"""{self._urlparts.scheme}://localhost:{proxy_port}"""
         self._browser.get(self._forwarder)
 
