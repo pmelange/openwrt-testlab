@@ -64,7 +64,7 @@ targets:
           meshmode_radio0: "80211a"
           meship_radio1: "10.31.34.69"
           meshmode_radio1: "80211s"
-          ssid: "testdev02.berlin.freifunk.net"
+          ssid: "testdev01.berlin.freifunk.net"
           dhcp: "10.36.147.112/28"
       - SSHDriver:
           explicit_scp_mode: True
