@@ -20,6 +20,7 @@ targets:
           bindings:
             output: powerdriver
       - DigitalOutputButtonDriver:
+          delay: 5.0
           bindings:
             output: resetdriver
       - SerialDriver: {}
@@ -36,7 +37,8 @@ targets:
             - set:
                 network:
                   lan:
-                    ipaddr: '192.168.102.1'
+                    ipaddr: '10.36.198.225'
+                    netmask: '255.255.255.240'
             - del_list:
                 network:
                   "@device[0]":
@@ -51,7 +53,7 @@ targets:
                     ports: 'ethernet'
       - OpenwrtLuCIDriver: {}
       - FreifunkWizardDriver:
-          address: "192.168.102.1"
+          address: "10.36.198.225"
           password: "abc123"
           network: "Freifunk Berlin"
           hostname: "testdev02"
@@ -65,16 +67,18 @@ targets:
           sharedInternet: True
           bw_down: "60"
           bw_up: "20"
-          stats: True
-          meship_radio0: "10.0.102.1"
-          meshmode_radio0: "adhoc"
-          meship_radio1: "10.0.102.2"
-          meshmode_radio1: "adhoc"
+          stats: False
+          meship_radio0: "10.31.38.181"
+          meshmode_radio0: "80211a"
+          meship_radio1: "10.31.38.182"
+          meshmode_radio1: "80211s"
           ssid: "testdev02.berlin.freifunk.net"
-          dhcp: "192.168.102.0/24"
+          dhcp: "10.36.198.224/28"
       - SSHDriver:
           explicit_scp_mode: True
       - NetworkInterfaceDriver: {}
       - OpenwrtFlashBootStrategy: {}
+images:
+  firmware: "~/firmware/openwrt-23.05-snapshot-r24145-db554fd450-freifunk-falter-1.4.0-ramips-mt7621-dlink_covr-x1860-a1-squashfs-sysupgrade.bin"
 imports:
   - ../../openwrt-testlab.py
