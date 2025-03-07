@@ -157,7 +157,7 @@ class OpenwrtLuCIDriver(Driver):
     @step(args=['form_element', 'value', 'optional'])
     def select_radiobutton(self, form_element, value, optional=False):
         # Select a radio button on the form
-        buttons = self._get_elements(form_element, optional, By.ID)
+        buttons = self._get_elements(form_element, optional, By.NAME)
         if buttons is not None:
             # find the value and click it
             for idx in range(len(buttons)):
