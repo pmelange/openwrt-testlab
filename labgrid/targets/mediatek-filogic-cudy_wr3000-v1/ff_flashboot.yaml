@@ -20,29 +20,57 @@ targets:
           bindings:
             output: powerdriver
       - DigitalOutputButtonDriver:
+          delay: 5.0
           bindings:
             output: resetdriver
       - SerialDriver: {}
       - ShellDriver:
-          prompt: 'root@[\w()]+:[^ ]+ '
+          prompt: 'root@[-\w()]+:[^ ]+ '
           login_prompt: Please press Enter to activate this console.
           await_login_timeout: 30
           login_timeout: 120
           post_login_settle_time: 5
           username: root
+          keyfile: "~/.ssh/id_rsa.pub"
       - OpenwrtUciDriver:
           config:
             - set:
                 network:
                   lan:
-                    ipaddr: '192.168.101.1'
-                system:
-                  "@system[0]":
-                    hostname: 'testdev01'
+                    ipaddr: '10.36.147.113'
+                    netmask: '255.255.255.240'
             - add_list:
                 network:
-                  "@device[0]": # br-lan
+                  "@device[0]":
                     ports: 'wan.101'
+      - OpenwrtLuCIDriver: {}
+      - FreifunkWizardDriver:
+          address: "10.36.147.113"
+          password: "abc123"
+          network: "Freifunk Berlin"
+          hostname: "testdev01"
+          nickname: "testlabuser"
+          realname: "openwrt-testlab"
+          email: "email@address"
+          location: "Panoramastrasse 1A, 10178 Berlin"
+          lat: "52.52081970085464"
+          lon: "13.409418231737128"
+          alt: "368"
+          sharedInternet: True
+          bw_down: "60"
+          bw_up: "20"
+          stats: False
+          meship_radio0: "10.31.34.68"
+          meshmode_radio0: "80211a"
+          meship_radio1: "10.31.34.69"
+          meshmode_radio1: "80211s"
+          ssid: "testdev02.berlin.freifunk.net"
+          dhcp: "10.36.147.112/28"
+      - SSHDriver:
+          explicit_scp_mode: True
+      - NetworkInterfaceDriver: {}
       - OpenwrtFlashBootStrategy: {}
+images:
+  firmware: "~/firmware/openwrt-23.05-snapshot-r24145-db554fd450-freifunk-falter-1.4.0-mediatek-filogic-cudy_wr3000-v1-squashfs-sysupgrade.bin"
 imports:
   - ../../openwrt-testlab.py
