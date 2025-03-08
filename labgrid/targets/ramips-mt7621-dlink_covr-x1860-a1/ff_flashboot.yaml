@@ -4,6 +4,7 @@ targets:
       - console
       - wifi
       - online
+      - olsr
     resources:
       - RemotePlace:
           name: port2

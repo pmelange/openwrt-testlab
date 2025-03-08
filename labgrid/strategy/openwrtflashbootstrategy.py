@@ -5,6 +5,7 @@ import attr
 from labgrid.factory import target_factory
 from labgrid.strategy import Strategy, StrategyError
 from labgrid.util.ssh import sshmanager
+from labgrid.step import step
 
 from time import sleep
 
@@ -45,14 +46,32 @@ class OpenwrtFlashBootStrategy(Strategy):
         self._shellready = False
         self.exporter_iface("down")
 
+    @step()
     def exporter_iface(self, state):
         self.target.activate(self.net)
         sshmanager.get(self.net.iface.host).run(f"""sudo if{state} {self.net.iface.ifname}""")
 
+    @step()
+    def exporter_renew_lease(self):
+        self.target.activate(self.net)
+        con = sshmanager.get(self.net.iface.host)
+        con.run(f"""sudo dhclient -r {self.net.iface.ifname}""")
+        con.run(f"""sudo dhclient {self.net.iface.ifname}""")
+        tries = 0
+        while True:
+            tries += 1
+            result, _, _ = con.run(f"""ip -f inet add show {self.net.iface.ifname}""")
+            if len(result) > 0:
+                return
+            if tries > 10:
+                raise SystemError(f"""Unable to aquire lease on {self.net.iface.host} for interface {self.net.iface.ifname}""")
+            sleep(1)
+
+    @step(args=['opts'])
     def sysupgrade(self, opts = ""):
         # flash a new image with keeping the settings
         self.transition(Status.bootrom)
-        self.exporter_iface("up")
+        self.exporter_renew_lease()
         # transfer the image to the device
         image = self.target.env.config.get_image_path("firmware")
         self.target.activate(self.ssh)
@@ -65,6 +84,7 @@ class OpenwrtFlashBootStrategy(Strategy):
         except:
             pass
 
+    @step()
     def wait_init(self):
         """
         Wait for the boot process to finish.  First we need that 'log' is i
@@ -79,6 +99,7 @@ class OpenwrtFlashBootStrategy(Strategy):
             sleep(5)
             _, _, errorcode = self.shell.run("logread -l 100 | grep init\ complete")
 
+    @step(args=['status'])
     def transition(self, status):
         if not isinstance(status, Status):
             status = Status[status]
@@ -101,15 +122,14 @@ class OpenwrtFlashBootStrategy(Strategy):
             self.target.activate(self.console)
             # cycle power
             self.power.cycle()
+            self.exporter_iface("up")
 
         elif status == Status.reboot:
             # runs reboot on the command if the shell is ready
             if self._shellready is True:
                 self.shell.run("reboot")
             self._shellready = False
-            self.exporter_iface("down")
             self.transition(Status.bootrom)
-            #self.exporter_iface("up")
 
         elif status == Status.reset:
             # runs firstboot
@@ -152,15 +172,14 @@ class OpenwrtFlashBootStrategy(Strategy):
         elif status == Status.ffwizard:
             # Run the ffwizard once the firstconfig is set up
             self.transition(Status.config)
-            self.exporter_iface("up")
+            self.exporter_renew_lease()
             self.target.activate(self.ffwizard)
             self.ffwizard.configure()
             self.target.deactivate(self.ffwizard)
             # ffwizard is complete, wait until reboot is finished.
             self.transition(Status.rebooting)
             # Ensure the iface on the exporter is set up right
-            self.exporter_iface("down")
-            self.exporter_iface("up")
+            self.exporter_renew_lease()
             # We are running
 
         elif status == Status.flash:
@@ -183,6 +202,7 @@ class OpenwrtFlashBootStrategy(Strategy):
         
         self.status = status
 
+    @step(args=['status'])
     def force(self, status):
         if not isinstance(status, Status):
             status = Status[status]

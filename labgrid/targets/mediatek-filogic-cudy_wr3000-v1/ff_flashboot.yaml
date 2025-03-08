@@ -1,7 +1,7 @@
 targets:
   main:
     features:
-      - console
+      - olsr
       - wifi
       - online
     resources:
