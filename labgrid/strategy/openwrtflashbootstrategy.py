@@ -44,12 +44,13 @@ class OpenwrtFlashBootStrategy(Strategy):
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
         self._shellready = False
-        self.exporter_iface("down")
+        self.exporter_release_lease()
 
     @step()
-    def exporter_iface(self, state):
+    def exporter_release_lease(self):
         self.target.activate(self.net)
-        sshmanager.get(self.net.iface.host).run(f"""sudo if{state} {self.net.iface.ifname}""")
+        con = sshmanager.get(self.net.iface.host)
+        con.run(f"""sudo dhclient -r {self.net.iface.ifname}""")
 
     @step()
     def exporter_renew_lease(self):
@@ -115,14 +116,13 @@ class OpenwrtFlashBootStrategy(Strategy):
             self.target.activate(self.power)
             self.power.off()
             self._shellread = False
-            self.exporter_iface("down")
+            self.exporter_release_lease()
 
         elif status == Status.on:
             self.transition(Status.off)
             self.target.activate(self.console)
             # cycle power
             self.power.cycle()
-            self.exporter_iface("up")
 
         elif status == Status.reboot:
             # runs reboot on the command if the shell is ready
