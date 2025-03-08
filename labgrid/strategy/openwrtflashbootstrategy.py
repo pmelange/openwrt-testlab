@@ -64,7 +64,7 @@ class OpenwrtFlashBootStrategy(Strategy):
             result, _, _ = con.run(f"""ip -f inet add show {self.net.iface.ifname}""")
             if len(result) > 0:
                 return
-            if tries > 10:
+            if tries > 30:
                 raise SystemError(f"""Unable to aquire lease on {self.net.iface.host} for interface {self.net.iface.ifname}""")
             sleep(1)
 
