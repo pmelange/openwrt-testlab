@@ -33,6 +33,7 @@ targets:
           post_login_settle_time: 5
           username: root
           keyfile: "~/.ssh/id_rsa.pub"
+          dest_authorized_keys: "/etc/dropbear/authorized_keys"
       - OpenwrtUciDriver:
           config:
             - set:

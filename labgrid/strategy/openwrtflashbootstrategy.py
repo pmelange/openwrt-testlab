@@ -158,7 +158,6 @@ class OpenwrtFlashBootStrategy(Strategy):
                 self.target.activate(self.shell)
                 self.wait_init()
             self._shellready = True
-            self.shell.run("cp ~/.ssh/authorized_keys /etc/dropbear")
 
         elif status == Status.config:
             # Preconfigure a fresh router based on the env's config params
