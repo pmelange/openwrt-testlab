@@ -26,14 +26,14 @@ class Status(enum.Enum):
 
 @target_factory.reg_driver
 @attr.s(eq=False)
-class OpenwrtFlashBootStrategy(Strategy):
-    """OpenwrtFlashBootStrategy - Strategy to boot from flash"""
+class OpenWrtFlashBootStrategy(Strategy):
+    """OpenWrtFlashBootStrategy - Strategy to boot from flash"""
     bindings = {
         "power": "PowerProtocol",
         'reset': "ButtonProtocol",
         "console": "ConsoleProtocol",
         "shell": "ShellDriver",
-        "config": "OpenwrtUciDriver",
+        "config": "OpenWrtUciDriver",
         "ffwizard": "FreifunkWizardDriver",
         "ssh": "SSHDriver",
         "net": "NetworkInterfaceDriver",

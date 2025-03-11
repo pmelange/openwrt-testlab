@@ -30,7 +30,7 @@ targets:
           login_timeout: 120
           post_login_settle_time: 5
           username: root
-      - OpenwrtUciDriver:
+      - OpenWrtUciDriver:
           config:
             network:
               wan:

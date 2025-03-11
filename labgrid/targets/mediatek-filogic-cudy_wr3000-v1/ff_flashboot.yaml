@@ -33,7 +33,7 @@ targets:
           username: root
           keyfile: "~/.ssh/id_rsa.pub"
           dest_authorized_keys: "/etc/dropbear/authorized_keys"
-      - OpenwrtUciDriver:
+      - OpenWrtUciDriver:
           config:
             - set:
                 network:
@@ -44,7 +44,7 @@ targets:
                 network:
                   "@device[0]":
                     ports: 'wan.101'
-      - OpenwrtLuCIDriver: {}
+      - OpenWrtLuCIDriver: {}
       - FreifunkWizardDriver:
           address: "10.36.147.113"
           password: "abc123"
@@ -70,7 +70,7 @@ targets:
       - SSHDriver:
           explicit_scp_mode: True
       - NetworkInterfaceDriver: {}
-      - OpenwrtFlashBootStrategy: {}
+      - OpenWrtFlashBootStrategy: {}
 images:
   firmware: "~/firmware/openwrt-23.05-snapshot-r24145-db554fd450-freifunk-falter-1.4.0-mediatek-filogic-cudy_wr3000-v1-squashfs-sysupgrade.bin"
 imports:

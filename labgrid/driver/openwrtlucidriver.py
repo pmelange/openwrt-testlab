@@ -19,9 +19,9 @@ from selenium.webdriver.support.ui import Select
 
 @target_factory.reg_driver
 @attr.s(eq=False)
-class OpenwrtLuCIDriver(Driver):
+class OpenWrtLuCIDriver(Driver):
     """
-    OpenwrtLuCIDriver is meant as a driver to change settings via the
+    OpenWrtLuCIDriver is meant as a driver to change settings via the
     web interface.
     """
     bindings = {

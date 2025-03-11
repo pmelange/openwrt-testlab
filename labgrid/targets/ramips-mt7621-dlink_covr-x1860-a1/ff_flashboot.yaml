@@ -34,7 +34,7 @@ targets:
           username: root
           keyfile: "~/.ssh/id_rsa.pub"
           dest_authorized_keys: "/etc/dropbear/authorized_keys"
-      - OpenwrtUciDriver:
+      - OpenWrtUciDriver:
           config:
             - set:
                 network:
@@ -53,7 +53,7 @@ targets:
                     ports: ['ethernet.102', 'internet']
                   "@device[3]":
                     ports: 'ethernet'
-      - OpenwrtLuCIDriver: {}
+      - OpenWrtLuCIDriver: {}
       - FreifunkWizardDriver:
           address: "10.36.198.225"
           password: "abc123"
@@ -79,7 +79,7 @@ targets:
       - SSHDriver:
           explicit_scp_mode: True
       - NetworkInterfaceDriver: {}
-      - OpenwrtFlashBootStrategy: {}
+      - OpenWrtFlashBootStrategy: {}
 images:
   firmware: "~/firmware/openwrt-23.05-snapshot-r24145-db554fd450-freifunk-falter-1.4.0-ramips-mt7621-dlink_covr-x1860-a1-squashfs-sysupgrade.bin"
 imports:

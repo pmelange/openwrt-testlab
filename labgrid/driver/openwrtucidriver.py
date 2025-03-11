@@ -9,9 +9,9 @@ from labgrid.protocol import ConsoleProtocol
 
 @target_factory.reg_driver
 @attr.s(eq=False)
-class OpenwrtUciDriver(Driver):
+class OpenWrtUciDriver(Driver):
     """
-    OpenwrtUciDriver is meant as a driver for Openwrt's uci command
+    OpenWrtUciDriver is meant as a driver for OpenWrt's uci command
     line interface.
 
     So far the following actions are supported. add, add_list, del_list,
@@ -87,7 +87,7 @@ class OpenwrtUciDriver(Driver):
     Example: - setting up a router to use a single port (wan) with VLAN
     tagging for br-lan Set a different IP on the lan interface and a hostname.
 
-        OpenwrtUciDriver:
+        OpenWrtUciDriver:
           config:
             - set:
                 network:

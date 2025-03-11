@@ -5,13 +5,13 @@ from labgrid.util import gen_marker
 from labgrid.step import step
 from labgrid.driver import Driver
 
-from driver.openwrtlucidriver import OpenwrtLuCIDriver
+from driver.openwrtlucidriver import OpenWrtLuCIDriver
 
 @target_factory.reg_driver
 @attr.s(eq=False)
 class FreifunkWizardDriver(Driver):
     bindings = {
-            "luci": "OpenwrtLuCIDriver",
+            "luci": "OpenWrtLuCIDriver",
             }
     """
     Driver for the Freifunk wizard

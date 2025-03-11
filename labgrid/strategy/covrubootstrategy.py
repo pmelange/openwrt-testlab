@@ -24,7 +24,7 @@ class CovrUBootStrategy(Strategy):
         "console": "ConsoleProtocol",
         "uboot": "UBootDriver",
         "shell": "ShellDriver",
-        "config": "OpenwrtUciDriver",
+        "config": "OpenWrtUciDriver",
     }
 
     status = attr.ib(default=Status.unknown)
