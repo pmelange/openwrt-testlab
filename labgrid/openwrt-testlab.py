@@ -11,4 +11,5 @@ from driver.covrubootdriver import CovrSmallUBootDriver
 from driver.cudyubootdriver import CudySmallUBootDriver
 from driver.openwrtucidriver import OpenWrtUciDriver
 from driver.openwrtlucidriver import OpenWrtLuCIDriver
+from driver.openwrtshelldriver import OpenWrtShellDriver
 from driver.freifunkwizarddriver import FreifunkWizardDriver

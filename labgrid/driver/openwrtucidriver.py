@@ -6,6 +6,7 @@ from labgrid.util import gen_marker
 from labgrid.step import step
 from labgrid.driver import Driver, ShellDriver
 from labgrid.protocol import ConsoleProtocol
+from .openwrtshelldriver import OpenWrtShellDriver
 
 @target_factory.reg_driver
 @attr.s(eq=False)
@@ -101,7 +102,7 @@ class OpenWrtUciDriver(Driver):
                   "@device[0]":     # br-lan
                     ports: 'wan.101'
     """
-    bindings = { "shell": ShellDriver, }
+    bindings = { "shell": OpenWrtShellDriver, }
     config = attr.ib(default=attr.Factory(list), validator=attr.validators.instance_of(list))
     auto_commit = attr.ib(default=True, validator=attr.validators.instance_of(bool))
     auto_reload = attr.ib(default=True, validator=attr.validators.instance_of(bool))
