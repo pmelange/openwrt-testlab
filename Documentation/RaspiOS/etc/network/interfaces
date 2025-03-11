@@ -1,0 +1,75 @@
+# interfaces(5) file used by ifup(8) and ifdown(8)
+# Include files from /etc/network/interfaces.d:
+source /etc/network/interfaces.d/*
+
+auto eth0
+iface eth0 inet static
+	address 192.168.0.1
+	netmask 255.255.255.0
+
+# meshlan
+#auto eth0.20
+#iface eth0.20 inet static
+#	vlan-raw-device eth0.20
+#
+#
+
+# mgmt network
+auto eth0.42
+iface eth0.42 inet static
+	vlan-raw-device eth0.42
+	address 10.31.183.137/28
+	netmask 255.255.255.240
+	gateway 10.31.183.129
+	dns 10.31.183.129
+
+auto eth0.101
+iface eth0.101 inet manual
+	vlan-raw-device eth0.101
+	metric 1000
+
+auto eth0.102
+iface eth0.102 inet manual
+	vlan-raw-device eth0.102
+	metric 1000
+
+auto eth0.103
+iface eth0.103 inet manual
+	vlan-raw-device eth0.103
+	metric 1000
+
+auto eth0.104
+iface eth0.104 inet manual
+	vlan-raw-device eth0.104
+	metric 1000
+
+auto eth0.105
+iface eth0.105 inet manual
+	vlan-raw-device eth0.105
+	metric 1000
+
+auto eth0.106
+iface eth0.106 inet manual
+	vlan-raw-device eth0.106
+	metric 1000
+
+auto eth0.107
+iface eth0.107 inet manual
+	vlan-raw-device eth0.107
+	metric 1000
+
+auto eth0.108
+iface eth0.108 inet manual
+	vlan-raw-device eth0.108
+	metric 1000
+
+auto eth0.109
+iface eth0.109 inet manual
+	vlan-raw-device eth0.109
+	metric 1000
+
+auto eth0.110
+iface eth0.110 inet manual
+	vlan-raw-device eth0.110
+	metric 1000
+

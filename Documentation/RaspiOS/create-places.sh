@@ -9,6 +9,8 @@ for i in $(seq 1 10); do
 		labgrid-client -p port$i add-named-match $(hostname)/testdev$j/NetworkSysfsGPIO/power power
 		labgrid-client -p port$i add-named-match $(hostname)/testdev$j/NetworkSysfsGPIO/reset reset
 		labgrid-client -p port$i add-match $(hostname)/testdev$j/NetworkSerialPort
+		labgrid-client -p port$i add-match $(hostname)/testdev$j/RemoteNetworkInterface
+		labgrid-client -p port$i add-match $(hostname)/testdev$j/NetworkService
 	fi
 	
 done
