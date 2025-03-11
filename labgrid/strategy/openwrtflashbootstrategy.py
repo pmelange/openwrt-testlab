@@ -1,3 +1,4 @@
+import os
 import enum
 
 import attr
@@ -23,6 +24,8 @@ class Status(enum.Enum):
     flash = 10
     upgrade = 11
     forceflash = 12
+    backup = 13
+    restore = 14
 
 @target_factory.reg_driver
 @attr.s(eq=False)
@@ -32,7 +35,7 @@ class OpenWrtFlashBootStrategy(Strategy):
         "power": "PowerProtocol",
         'reset': "ButtonProtocol",
         "console": "ConsoleProtocol",
-        "shell": "ShellDriver",
+        "shell": "OpenWrtShellDriver",
         "config": "OpenWrtUciDriver",
         "ffwizard": "FreifunkWizardDriver",
         "ssh": "SSHDriver",
@@ -115,7 +118,7 @@ class OpenWrtFlashBootStrategy(Strategy):
             self.target.deactivate(self.console)
             self.target.activate(self.power)
             self.power.off()
-            self._shellread = False
+            self._shellready = False
             self.exporter_release_lease()
 
         elif status == Status.on:
@@ -156,7 +159,7 @@ class OpenWrtFlashBootStrategy(Strategy):
                 self.transition(Status.on)
             if self._shellready is not True:
                 self.target.activate(self.shell)
-                self.wait_init()
+#                self.wait_init()
             self._shellready = True
 
         elif status == Status.config:
@@ -183,19 +186,44 @@ class OpenWrtFlashBootStrategy(Strategy):
 
         elif status == Status.flash:
             # flash a new image without keeping the settings
-            self.sysupgrade("-n")
+            self.exporter_renew_lease()
+            image = self.target.env.config.get_image_path("firmware")
+            self.target.activate(self.ssh)
+            self.ssh.put(image, "/tmp/image.bin")
+            self.shell.sysupgrade("/tmp/image.bin", keepconfig=False)
             self.transition(Status.rebooting)
 
         elif status == Status.upgrade:
             # flash new new image with keeping the settings
-            self.sysupgrade()
+            self.exporter_renew_lease()
+            image = self.target.env.config.get_image_path("firmware")
+            self.target.activate(self.ssh)
+            self.ssh.put(image, "/tmp/image.bin")
+            self.shell.sysupgrade("/tmp/image.bin")
             self.transition(Status.rebooting)
 
         elif status == Status.forceflash:
             # force flash without keeping the settings
-            self.sysupgrade("--force -n")
+            self.exporter_renew_lease()
+            image = self.target.env.config.get_image_path("firmware")
+            self.target.activate(self.ssh)
+            self.ssh.put(image, "/tmp/image.bin")
+            self.shell.sysupgrade("/tmp/image.bin", force=True, keepconfig=False)
             self.transition(Status.rebooting)
 
+        elif status == Status.backup:
+            self.exporter_renew_lease()
+            filename = self.shell.backup()
+            self.target.activate(self.ssh)
+            path = self.target.env.config.get_path("backup")
+            self.ssh.get(filename, path)
+
+        elif status == Status.restore:
+            self.exporter_renew_lease()
+            backup = self.target.env.config.get_image_path("backup")
+            self.target.activate(self.ssh)
+            self.ssh.put(backup, "/tmp")
+            self.shell.restore(f"""/tmp/{os.path.basename(backup)}""")
         else:
             raise StrategyError(f"no transition found from {self.status} to {status}")
         

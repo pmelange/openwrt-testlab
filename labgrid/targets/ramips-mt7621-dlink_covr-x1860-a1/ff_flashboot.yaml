@@ -25,7 +25,7 @@ targets:
           bindings:
             output: resetdriver
       - SerialDriver: {}
-      - ShellDriver:
+      - OpenWrtShellDriver:
           prompt: 'root@[-\w()]+:[^ ]+ '
           login_prompt: Please press Enter to activate this console.
           await_login_timeout: 30
@@ -80,7 +80,10 @@ targets:
           explicit_scp_mode: True
       - NetworkInterfaceDriver: {}
       - OpenWrtFlashBootStrategy: {}
+paths:
+  backup: "/tmp"
 images:
   firmware: "~/firmware/openwrt-23.05-snapshot-r24145-db554fd450-freifunk-falter-1.4.0-ramips-mt7621-dlink_covr-x1860-a1-squashfs-sysupgrade.bin"
+  backup: "~/backup/dlink-covr.tar.gz"
 imports:
   - ../../openwrt-testlab.py
