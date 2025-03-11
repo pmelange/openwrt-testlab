@@ -1,4 +1,9 @@
 {% set baselist = [578, 586, 594, 602, 610] %}
+{% set devip = ["192.168.101.1", "192.168.102.1", "192.168.103.1", 
+                "192.168.104.1", "192.168.105.1", "192.168.106.1", 
+                "192.168.107.1", "192.168.108.1", "192.168.109.1", 
+                "192.168.110.1"] %}
+
 {% for testdev in range(0, 10) %}
 testdev{{0 if testdev < 9}}{{testdev + 1}}:
   location: "testdev{{0 if testdev < 9}}{{testdev + 1}}"
@@ -13,9 +18,9 @@ testdev{{0 if testdev < 9}}{{testdev + 1}}:
     index: {{ baselist[(testdev/2)|round(0, 'floor')|int] + (testdev%2) +2 }}
     invert: False
   NetworkInterface:
-    ifname: "eth0.2{{0 if testdev < 9}}{{testdev + 1}}"
+    ifname: "eth0.1{{0 if testdev < 9}}{{testdev + 1}}"
   NetworkService:
-    address: "192.168.1{{0 if testdev<9}}{{testdev + 1}}.1"
+    address: {{ devip[testdev] }}
     username: root
 {% endfor %}
 aux1:
