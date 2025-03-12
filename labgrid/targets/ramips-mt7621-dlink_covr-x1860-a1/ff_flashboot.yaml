@@ -21,7 +21,7 @@ targets:
           bindings:
             output: powerdriver
       - DigitalOutputButtonDriver:
-          delay: 5.0
+          delay: 7.0
           bindings:
             output: resetdriver
       - SerialDriver: {}
