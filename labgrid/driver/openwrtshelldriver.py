@@ -26,43 +26,55 @@ from labgrid.driver.exception import ExecutionError
 @attr.s(eq=False)
 class OpenWrtShellDriver(ShellDriver):
     """OpenWrtShellDriver - Driver to execute commands on the shell
-    ShellDriver binds on top of a ConsoleProtocol.
+    OpenWrtShellDriver inherits from ShellDriver and binds on top of a 
+    ConsoleProtocol.  All Arguments are set to OpenWrt standard values,
+    reducing the amount of options needed in the environment.yaml definition.
 
-    On activation, the ShellDriver will look for the login prompt on the console,
-    and login to provide shell access.
+    On activation, the ShellDriver will look for the login prompt on the 
+    console, wait until the init process is far enough along for the system
+    to settle down, optionally put the ssh_key_file on the system, and to
+    provide shell access.
 
     Args:
-        prompt (regex): the shell prompt to detect
-        login_prompt (regex): the login prompt to detect
-        username (str): username to login with
-        password (str): password to login with
+        prompt (regex): the shell prompt to detect, default set to OpenWrt 
+            standard
+        login_prompt (regex): the login prompt to detect, default set to 
+            OpenWrt standard
+        username (str): username to login with, default set to OpenWrt standard
+        password (str): password to login with (not needed wit OpenWrt standard)
         keyfile (str): keyfile to bind mount over users authorized keys
-        dest_authorized_keys (str): optional, default="~/.ssh/authorized_keys", filename of the authorized_keys file
-        login_timeout (int): optional, timeout for login prompt detection
-        console_ready (regex): optional, pattern used by the kernel to inform the user that a
-            console can be activated by pressing enter.
-       await_login_timeout (int): optional, time in seconds of silence that needs to pass before
-            sending a newline to device.
-        post_login_settle_time (int): optional, seconds of silence after logging in
-            before check for a prompt. Useful when the console is interleaved with boot
-            output which may interrupt prompt detection.
+        dest_authorized_keys (str): optional, 
+            default="/etc/dropbear/authorized_keys", filename of the 
+            authorized_keys file, set to OpenWrt standard
+        login_timeout (int): optional, timeout for login prompt detection, 
+            default set to OpenWrt standard
+        console_ready (regex): optional, pattern used by the kernel to inform 
+            the user that a console can be activated by pressing enter, 
+            default set to OpenWrt standard
+        await_login_timeout (int): optional, time in seconds of silence that 
+            needs to pass before sending a newline to device, default set to 
+            OpenWrt standard
+        post_login_settle_time (int): optional, seconds of silence after 
+            logging in before check for a prompt. Useful when the console 
+            is interleaved with boot output which may interrupt prompt 
+            detection, default set to OpenWrt standard
         ubus_ready: optional, default="session", the name of an ubus service to 
             become active the post_login_settle_time to determine if the 
-            OpenWrt system is ready.
+            OpenWrt system is ready, default set to OpenWrt standard
         ubus_ready_timeout: optional, default="60", maximum amount of time to 
-            wait for ubus to be ready.
+            wait for ubus to be ready, default set to OpenWrt standard
     """
     bindings = {"console": ConsoleProtocol, }
-    prompt = attr.ib(validator=attr.validators.instance_of(str))
-    login_prompt = attr.ib(validator=attr.validators.instance_of(str))
-    username = attr.ib(validator=attr.validators.instance_of(str))
+    prompt = attr.ib(default="root@[-\w()]+:[^ ]+ ", validator=attr.validators.instance_of(str))
+    login_prompt = attr.ib(default="Please press Enter to activate this console.", validator=attr.validators.instance_of(str))
+    username = attr.ib(default="root", validator=attr.validators.instance_of(str))
     password = attr.ib(default=None, validator=attr.validators.optional(attr.validators.instance_of(str)))
     keyfile = attr.ib(default="", validator=attr.validators.instance_of(str))
-    dest_authorized_keys = attr.ib(default="~/.ssh/authorized_keys", validator=attr.validators.instance_of(str))
-    login_timeout = attr.ib(default=60, validator=attr.validators.instance_of(int))
+    dest_authorized_keys = attr.ib(default="/etc/dropbear/authorized_keys", validator=attr.validators.instance_of(str))
+    login_timeout = attr.ib(default=120, validator=attr.validators.instance_of(int))
     console_ready = attr.ib(default="", validator=attr.validators.instance_of(str))
-    await_login_timeout = attr.ib(default=2, validator=attr.validators.instance_of(int))
-    post_login_settle_time = attr.ib(default=0, validator=attr.validators.instance_of(int))
+    await_login_timeout = attr.ib(default=30, validator=attr.validators.instance_of(int))
+    post_login_settle_time = attr.ib(default=5, validator=attr.validators.instance_of(int))
     ubus_ready = attr.ib(default="session", validator=attr.validators.instance_of(str))
     ubus_ready_timeout = attr.ib(default=60.0, validator=attr.validators.instance_of(float))
 
