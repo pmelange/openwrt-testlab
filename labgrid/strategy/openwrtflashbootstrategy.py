@@ -88,21 +88,6 @@ class OpenWrtFlashBootStrategy(Strategy):
         except:
             pass
 
-    @step()
-    def wait_init(self):
-        """
-        Wait for the boot process to finish.  First we need that 'log' is i
-        available then we check the log until 'init complete' is announced
-        """
-        _, _, errorcode = self.shell.run("ubus -t 10 wait_for log")
-        while errorcode != 0:
-            _, _, errorcode = self.shell.run("ubus -t 10 wait_for log")
-        # wait until init is complete
-        _, _, errorcode = self.shell.run("logread -l 100 | grep init\ complete")
-        while errorcode != 0:
-            sleep(5)
-            _, _, errorcode = self.shell.run("logread -l 100 | grep init\ complete")
-
     @step(args=['status'])
     def transition(self, status):
         if not isinstance(status, Status):
@@ -159,7 +144,6 @@ class OpenWrtFlashBootStrategy(Strategy):
                 self.transition(Status.on)
             if self._shellready is not True:
                 self.target.activate(self.shell)
-#                self.wait_init()
             self._shellready = True
 
         elif status == Status.config:
