@@ -136,3 +136,26 @@ class OpenWrtShellDriver(ShellDriver):
     @step(args=['filename'])
     def restore(self, filename):
         self._run(f"""sysupgrade -r {filename}""")
+
+    @Driver.check_active
+    @step()
+    def get_dhcpd_leases(self):
+        results, _, errorcode = self._run("cat /tmp/dhcp.leases")
+        leases = []
+        if errorcode is not 0:
+            for line in results:
+                line = line.strip().split()
+                if line[3] == "*":
+                    line[3] = None
+                if line[4] == "*":
+                    line[4] = None
+                leases.append(
+                    {
+                        "expire": int(line[0]),
+                        "mac": line[1],
+                        "ip": line[2],
+                        "hostname": line[3],
+                        "id": line[4],
+                    }
+                )
+        return leases
