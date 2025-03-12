@@ -71,23 +71,6 @@ class OpenWrtFlashBootStrategy(Strategy):
                 raise SystemError(f"""Unable to aquire lease on {self.net.iface.host} for interface {self.net.iface.ifname}""")
             sleep(1)
 
-    @step(args=['opts'])
-    def sysupgrade(self, opts = ""):
-        # flash a new image with keeping the settings
-        self.transition(Status.bootrom)
-        self.exporter_renew_lease()
-        # transfer the image to the device
-        image = self.target.env.config.get_image_path("firmware")
-        self.target.activate(self.ssh)
-        self.ssh.put(image, "/tmp/image.bin")
- 
-        # the try/except block is needed because the router will
-        # reboot before the run command can return anything
-        try:
-            self.shell.run(f"""sysupgrade {opts} /tmp/image.bin""")
-        except:
-            pass
-
     @step(args=['status'])
     def transition(self, status):
         if not isinstance(status, Status):
