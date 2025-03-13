@@ -5,6 +5,7 @@ import attr
 
 from labgrid.factory import target_factory
 from labgrid.strategy import Strategy, StrategyError
+from labgrid.util import Timeout
 from labgrid.util.ssh import sshmanager
 from labgrid.step import step
 
@@ -61,15 +62,15 @@ class OpenWrtFlashBootStrategy(Strategy):
         con = sshmanager.get(self.net.iface.host)
         con.run(f"""sudo dhclient -r {self.net.iface.ifname}""")
         con.run(f"""sudo dhclient {self.net.iface.ifname}""")
-        tries = 0
-        while True:
-            tries += 1
+        timeout = Timeout(60.0)
+        while not timeout.expired:
             result, _, _ = con.run(f"""ip -f inet add show {self.net.iface.ifname}""")
             if len(result) > 0:
                 return
-            if tries > 30:
-                raise SystemError(f"""Unable to aquire lease on {self.net.iface.host} for interface {self.net.iface.ifname}""")
             sleep(1)
+
+        # Timeout encountered
+        raise SystemError(f"""Unable to aquire lease on {self.net.iface.host} for interface {self.net.iface.ifname}""")
 
     @step(args=['status'])
     def transition(self, status):

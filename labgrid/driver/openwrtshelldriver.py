@@ -1,6 +1,6 @@
 # pylint: disable=unused-argument
 """The OpenWrtShellDriver implements the ShellDriver with OpenWrt specific
-   setting and methods."""
+   settings and methods."""
 import os
 import io
 import re
@@ -55,9 +55,10 @@ class OpenWrtShellDriver(ShellDriver):
             logging in before check for a prompt. Useful when the console 
             is interleaved with boot output which may interrupt prompt 
             detection, default set to OpenWrt standard
-        ubus_ready: optional, default="session", the name of an ubus service to 
-            become active the post_login_settle_time to determine if the 
-            OpenWrt system is ready, default set to OpenWrt standard
+        ubus_ready: optional, default="network.interface.loopback", the name
+            of an ubus service to become active the post_login_settle_time
+            to determine if the OpenWrt system is ready, default set to
+            OpenWrt standard
         ubus_ready_timeout: optional, default="60", maximum amount of time to 
             wait for ubus to be ready, default set to OpenWrt standard
     """
@@ -72,7 +73,7 @@ class OpenWrtShellDriver(ShellDriver):
     console_ready = attr.ib(default="", validator=attr.validators.instance_of(str))
     await_login_timeout = attr.ib(default=30, validator=attr.validators.instance_of(int))
     post_login_settle_time = attr.ib(default=5, validator=attr.validators.instance_of(int))
-    ubus_ready = attr.ib(default="session", validator=attr.validators.instance_of(str))
+    ubus_ready = attr.ib(default="network.interface.loopback", validator=attr.validators.instance_of(str))
     ubus_ready_timeout = attr.ib(default=60.0, validator=attr.validators.instance_of(float))
 
     def __attrs_post_init__(self):
@@ -98,7 +99,7 @@ class OpenWrtShellDriver(ShellDriver):
 
     @step()
     def _wait_ubus(self):
-        """ Waits until the ubus object wiat_ubus is available"""
+        """ Waits until the ubus object wait_ubus is available"""
         timeout = Timeout(self.ubus_ready_timeout)
         while not timeout.expired:
             _, _, exitcode = self._run(f"""ubus -t 10 wait_for {self.ubus_ready}""",
