@@ -1,7 +1,6 @@
 import attr
 
 from labgrid.factory import target_factory
-from labgrid.util import gen_marker
 from labgrid.step import step
 from labgrid.driver import Driver
 

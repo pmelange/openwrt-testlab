@@ -1,6 +1,6 @@
 # pylint: disable=unused-argument
-"""The OpenWrtShellDriver provides the CommandProtocol, ConsoleProtocol and
- InfoProtocol on top of a SerialPort."""
+"""The OpenWrtShellDriver implements the ShellDriver with OpenWrt specific
+   setting and methods."""
 import os
 import io
 import re
@@ -10,15 +10,12 @@ from datetime import datetime
 
 import attr
 from pexpect import TIMEOUT
-import xmodem
 
 from labgrid.factory import target_factory
-from labgrid.protocol import CommandProtocol, ConsoleProtocol, FileTransferProtocol
+from labgrid.protocol import ConsoleProtocol
 from labgrid.step import step
-from labgrid.util import gen_marker, Timeout, re_vt100
-from labgrid.driver import ShellDriver
-from labgrid.driver.commandmixin import CommandMixin
-from labgrid.driver.common import Driver
+from labgrid.util import Timeout
+from labgrid.driver import Driver, ShellDriver
 from labgrid.driver.exception import ExecutionError
 
 
@@ -142,7 +139,7 @@ class OpenWrtShellDriver(ShellDriver):
     def get_dhcpd_leases(self):
         results, _, errorcode = self._run("cat /tmp/dhcp.leases")
         leases = []
-        if errorcode is not 0:
+        if errorcode != 0:
             for line in results:
                 line = line.strip().split()
                 if line[3] == "*":

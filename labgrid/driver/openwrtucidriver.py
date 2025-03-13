@@ -2,11 +2,8 @@ import attr
 from time import sleep
 
 from labgrid.factory import target_factory
-from labgrid.util import gen_marker
 from labgrid.step import step
 from labgrid.driver import Driver, ShellDriver
-from labgrid.protocol import ConsoleProtocol
-#from .openwrtshelldriver import OpenWrtShellDriver
 
 @target_factory.reg_driver
 @attr.s(eq=False)

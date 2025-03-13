@@ -5,7 +5,6 @@ import shutil
 
 from labgrid.factory import target_factory
 from labgrid.util import gen_marker
-from labgrid.util.proxy import proxymanager
 from labgrid.util.ssh import sshmanager
 from labgrid.step import step
 from labgrid.driver import Driver
