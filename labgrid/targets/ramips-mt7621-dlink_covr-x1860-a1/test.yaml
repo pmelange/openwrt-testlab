@@ -1,0 +1,14 @@
+targets:
+  main:
+    features:
+      - console
+      - wifi
+      - online
+      - olsr
+    resources:
+      - RemotePlace:
+          name: port2
+    drivers:
+      - TestStrategy: {}
+imports:
+  - ../../strategy/test.py
