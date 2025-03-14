@@ -25,6 +25,20 @@ targets:
           bindings:
             output: resetdriver
       - SerialDriver: {}
+      - CovrSmallUBootDriver:
+          prompt: '=>'
+          boot_expression: 'stop autoboot'
+          boot_secret: 'a'
+          boot_secret_nolf: True
+          #boot_commands:
+          #  - boot
+          #tftpboot_commands:
+          #  - printenv
+          #  - setenv ipaddr 192.168.0.2
+          #  - setenv serverip 192.168.0.1
+          #  - tftpboot openwrt-24.10.0-ramips-mt7621-dlink_covr-x1860-a1-initramfs-kernel.bin
+          #bootp_commands: 
+          #  - bootp
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
       - OpenWrtUciDriver:

@@ -1,5 +1,6 @@
 import attr
 from time import sleep
+from datetime import datetime
 
 from labgrid.factory import target_factory
 from labgrid.step import step
@@ -197,6 +198,11 @@ class OpenWrtUciDriver(Driver):
                         self.delete_dict(configs)
                     case _:
                         raise ValueError("action {action} is not implemented")
+        # add a config setting to mark that we have done something
+        self.set("system",
+                 "@system[0]",
+                 "labgridconfig",
+                 datetime.now().strftime("%Y-%m-%d@%H:%M:%S"))
         self.commit()
         self.reload_config()
 

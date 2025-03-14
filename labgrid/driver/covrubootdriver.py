@@ -1,7 +1,8 @@
 import attr
+from pexpect import TIMEOUT
 
 from labgrid.factory import target_factory
-from labgrid.util import gen_marker
+from labgrid.util import gen_marker, Timeout
 from labgrid.step import step
 from labgrid.driver import Driver
 
@@ -60,23 +61,52 @@ class CovrSmallUBootDriver(UBootDriver):
         """
 
         # wait for boot expression. Afterwards enter secret
-        self.console.expect(self.boot_expression, timeout=self.login_timeout)
+        timeout = Timeout(float(self.login_timeout))
+        expectations = [self.prompt,
+                        self.boot_expression,
+                        TIMEOUT]
+        last_before = None
 
-        secret = self.boot_secret.encode('ASCII')
-        if self.boot_secret.startswith('\\x'):
+        while True:
+            print(f""" CovrUBoot: Timeout Remaining = {timeout.remaining}""")
+            index, before, _, _ =  self.console.expect(expectations, timeout=2)
+            print(f"""  XXXXXXXXXXX index = {index}""")
+
+            if index == 0:
+                # we have the uboot prompt
+                self._status = 1
+                break
+
+            elif index == 1:
+                # interrupt autoboot
+                secret = self.boot_secret.encode('ASCII')
+                if self.boot_secret.startswith('\\x'):
+                    try:
+                        secret = bytearray.fromhex(self.boot_secret[2:])
+                    except ValueError:
+                        pass
+
+                if self.boot_secret_nolf:
+                    self.console.write(secret)
+                else:
+                    self.console.sendline(self.boot_secret)
+
+                continue
+
+            elif index == 2:
+                if before == last_before:
+                    self.console.sendline("")
+                if timeout.expired:
+                    raise TIMEOUT(
+                            f"""COVR Timeout of {self.login_timeout} seconds exceeded during waiting for login"""
+                            )
+            last_before = before
+
             try:
-                secret = bytearray.fromhex(self.boot_secret[2:])
-            except ValueError:
+                self._check_prompt()
+            except TIMEOUT:
                 pass
 
-        if self.boot_secret_nolf:
-            self.console.write(secret)
-        else:
-            self.console.sendline(self.boot_secret)
-        self._status = 1
-
-        # wait until UBoot has reached it's prompt
-        self.console.expect(self.prompt)
         for command in self.init_commands:
             self._run(command)
 
@@ -127,3 +157,18 @@ class CovrSmallUBootDriver(UBootDriver):
             name (str): address to boot
         """
         self.console.sendline(f"bootm {name}")
+
+    @Driver.check_active
+    @step()
+    def flash(self):
+        pass
+
+    @Driver.check_active
+    @step()
+    def tftpboot(self):
+        pass
+
+    @Driver.check_active
+    @step()
+    def bootp(self):
+        pass
