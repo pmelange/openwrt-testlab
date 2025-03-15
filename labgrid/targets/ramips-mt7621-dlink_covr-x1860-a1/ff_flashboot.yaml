@@ -25,7 +25,13 @@ targets:
           bindings:
             output: resetdriver
       - SerialDriver: {}
-      - CovrSmallUBootDriver:
+      - UBootInteractionBoot:
+          commands:
+            - boot
+      - UBootInteractionFlash:
+          commands:
+            - boot
+      - OpenWrtUBootDriver:
           prompt: '=>'
           boot_expression: 'stop autoboot'
           boot_secret: 'a'

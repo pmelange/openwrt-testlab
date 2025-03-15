@@ -18,7 +18,7 @@ class Status(enum.Enum):
     off = auto()
     on = auto()
     uboot_shell = auto()
-    uboot_rom = auto()
+    uboot_boot = auto()
     uboot_flash = auto()
     uboot_tftpboot = auto()
     uboot_bootp = auto()
@@ -169,13 +169,15 @@ class OpenWrtFlashBootStrategy(Strategy):
                 self.target.activate(self.console)
                 self.power.cycle()
 
-            case Status.uboot_shell | Status.uboot_rom | Status.uboot_flash | Status.uboot_tftpboot | Status.uboot_bootp:
+            case Status.uboot_shell | Status.uboot_boot | Status.uboot_flash | Status.uboot_tftpboot | Status.uboot_bootp:
                 if not self.power.get() or not self._ubootready:
                     self.transition(Status.on)
-                    self.target.activate(self.uboot)
-                    self._ubootready = True
+                else:
+                    self.uboot._status = 1
+                self.target.activate(self.uboot)
+                self._ubootready = True
                 match status:
-                    case Status.uboot_rom:
+                    case Status.uboot_boot:
                         self.uboot.boot()
                     case Status.uboot_flash:
                         self.uboot.flash()
@@ -183,7 +185,7 @@ class OpenWrtFlashBootStrategy(Strategy):
                         self.uboot.tftpboot()
                     case Status.uboot_bootp:
                         self.uboot.bootp()
-                if status != Status.boot_shell:
+                if status != Status.uboot_shell:
                     self._ubootready = False
 
             case Status.shell:
