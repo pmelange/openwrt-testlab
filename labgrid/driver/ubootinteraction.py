@@ -1,5 +1,6 @@
 import attr
 from pexpect import TIMEOUT
+from time import sleep
 
 from labgrid.factory import target_factory
 from labgrid.util import gen_marker, Timeout
@@ -53,11 +54,17 @@ class UBootInteraction(Driver):
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
 
-    @Driver.check_active
     @step()
-    def run(self):
-        for command in self.commands:
-            self.console.sendline(command)
+    def prepare(self):
+        pass
+
+    @step()
+    def get_commands(self):
+        return self.commands
+
+    @step()
+    def finish(self):
+        pass
 
 @target_factory.reg_driver
 @attr.s(eq=False)
@@ -65,17 +72,11 @@ class UBootInteractionBoot(UBootInteraction):
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
 
-    def run(self):
-        super().run()
-
 @target_factory.reg_driver
 @attr.s(eq=False)
 class UBootInteractionFlash(UBootInteraction):
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
-
-    def run(self):
-        super().run()
 
 @target_factory.reg_driver
 @attr.s(eq=False)
@@ -83,15 +84,9 @@ class UBootInteractionTftpboot(UBootInteraction):
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
 
-    def run(self):
-        super().run()
-
 @target_factory.reg_driver
 @attr.s(eq=False)
 class UBootInteractionBootp(UBootInteraction):
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
-
-    def run(self):
-        super().run()
 

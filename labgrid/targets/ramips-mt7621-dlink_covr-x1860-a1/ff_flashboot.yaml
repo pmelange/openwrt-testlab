@@ -31,6 +31,10 @@ targets:
       - UBootInteractionFlash:
           commands:
             - boot
+      - UBootInteractionBootp:
+          commands:
+            - bootp
+            - bootm
       - OpenWrtUBootDriver:
           prompt: '=>'
           boot_expression: 'stop autoboot'

@@ -173,9 +173,12 @@ class OpenWrtFlashBootStrategy(Strategy):
                 if not self.power.get() or not self._ubootready:
                     self.transition(Status.on)
                 else:
-                    self.uboot._status = 1
+                    self.console.sendline("")#uboot._status = 1
                 self.target.activate(self.uboot)
                 self._ubootready = True
+                self._shellready = False
+                self._configured = None
+                self._ffwizard = None
                 match status:
                     case Status.uboot_boot:
                         self.uboot.boot()
