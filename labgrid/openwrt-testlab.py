@@ -9,7 +9,12 @@ from strategy.covrubootstrategy import CovrUBootStrategy
 from strategy.cudyubootstrategy import CudyUBootStrategy
 from driver.covrubootdriver import CovrSmallUBootDriver
 from driver.cudyubootdriver import CudySmallUBootDriver
+from driver.openwrtubootdriver import OpenWrtUBootDriver
 from driver.openwrtucidriver import OpenWrtUciDriver
 from driver.openwrtlucidriver import OpenWrtLuCIDriver
 from driver.openwrtshelldriver import OpenWrtShellDriver
 from driver.freifunkwizarddriver import FreifunkWizardDriver
+from driver.ubootinteraction import UBootInteractionBoot, \
+                                    UBootInteractionFlash, \
+                                    UBootInteractionTftpboot, \
+                                    UBootInteractionBootp
