@@ -1,12 +1,13 @@
 {% set baselist = [578, 586, 594, 602, 610] %}
-{% set devip = ["192.168.101.1", "192.168.102.1", "192.168.103.1", 
-                "192.168.104.1", "192.168.105.1", "192.168.106.1", 
-                "192.168.107.1", "192.168.108.1", "192.168.109.1", 
-                "192.168.110.1"] %}
-
+{% set devip =["10.36.147.113", "10.36.198.225", "192.168.103.1", 
+               "192.168.104.1", "192.168.105.1", "192.168.106.1", 
+               "192.168.107.1", "192.168.108.1", "192.168.109.1", 
+               "192.168.110.1"] %}
 {% for testdev in range(0, 10) %}
-testdev{{0 if testdev < 9}}{{testdev + 1}}:
-  location: "testdev{{0 if testdev < 9}}{{testdev + 1}}"
+{% set devnum = "0" if testdev < 9 else "" %}
+{% set devnum = devnum + (testdev + 1)|string %}
+testdev{{devnum}}:
+  location: "testdev{{devnum}}"
   RawSerialPort:
     port: "/dev/ttySC{{testdev}}"
   power:
@@ -18,10 +19,13 @@ testdev{{0 if testdev < 9}}{{testdev + 1}}:
     index: {{ baselist[(testdev/2)|round(0, 'floor')|int] + (testdev%2) +2 }}
     invert: False
   NetworkInterface:
-    ifname: "eth0.1{{0 if testdev < 9}}{{testdev + 1}}"
+    ifname: "eth0.1{{devnum}}"
   NetworkService:
     address: {{ devip[testdev] }}
     username: root
+  TFTPProvider:
+    internal: "/srv/tftp/testdev{{devnum}}"
+    external: "testdev{{devnum}}/"
 {% endfor %}
 aux1:
   SysfsGPIO:
