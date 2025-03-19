@@ -95,7 +95,7 @@ class UBootInteraction(Driver):
     @step()
     def prepare(self):
         if self.image != "":
-            self._imagepath = self.provider.stage(self.target.env.config.get_image_path(self.image))
+            self._imagepath = "/srv/tftp/" + self.provider.stage(self.target.env.config.get_image_path(self.image))
             print(f"""YYYYYYY Staged to {self._imagepath}""")
 
     @step()
