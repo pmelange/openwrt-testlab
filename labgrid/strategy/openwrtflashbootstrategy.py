@@ -65,7 +65,7 @@ class OpenWrtFlashBootStrategy(Strategy):
             expectations = [self.uboot.prompt,
                             self.shell.prompt,
                             TIMEOUT]
-            self.console.write(bytearray.fromhex('03'))
+            self.console.sendline("")
             index, _, _, _ = self.console.expect(expectations, timeout=5)
             if index == 0:
                 self._ubootready = True
@@ -77,7 +77,7 @@ class OpenWrtFlashBootStrategy(Strategy):
                 raise StrategyError("Unable to determine state")
             if self._shellready:
                 # check to see if we are configured
-                self.console.write(bytearray.fromhex('03'))
+                self.console.sendline("")
                 self.target.activate(self.uci)
                 _, _, error = self.uci.get("system", 
                                            "@system[0]", 
@@ -173,7 +173,7 @@ class OpenWrtFlashBootStrategy(Strategy):
                 if not self.power.get() or not self._ubootready:
                     self.transition(Status.on)
                 else:
-                    self.console.write(bytearray.fromhex('03'))
+                    self.console.sendline("")
                 self.target.activate(self.uboot)
                 self._ubootready = True
                 self._shellready = False

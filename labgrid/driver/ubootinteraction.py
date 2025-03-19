@@ -5,6 +5,7 @@ from time import sleep
 
 from labgrid.factory import target_factory
 from labgrid.util import gen_marker, Timeout
+from labgrid.util.ssh import sshmanager
 from labgrid.step import step
 from labgrid.driver import Driver, TFTPProviderDriver
 
@@ -131,6 +132,29 @@ class UBootInteractionTftpboot(UBootInteraction):
 @target_factory.reg_driver
 @attr.s(eq=False)
 class UBootInteractionBootp(UBootInteraction):
+    mac = attr.ib(default="", validator=attr.validators.instance_of(str))
+    bootpip = attr.ib(default="", validator=attr.validators.instance_of(str))
+
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
 
+    @step()
+    def prepare(self):
+        super().prepare() # set up tftp
+
+        if self.mac != "" and self.bootpip != "":
+            # set up dnsmasq on the exporter to set up bootp
+            con = sshmanager.get(self.provider.provider.host)
+            filename = (self.mac.replace(":", "") + "-dnsmasq.conf")
+            config = ("dhcp-host=" +
+                      self.mac + "," +
+                      self.bootpip + ",set:" +
+                      self.mac.replace(":", "") + "\ndhcp-option=tag:" +
+                      self.mac.replace(":", "") + ",option:bootfile-name," +
+                      self._imagepath + "\n")
+            fd = open(f"""/tmp/{filename}""", "w")
+            fd.write(config)
+            fd.close()
+            con.put_file(f"""/tmp/{filename}""", "/tmp")
+            con.run(f"""sudo mv /tmp/{filename} /etc/dnsmasq.d""")
+            con.run("sudo systemctl reload dnsmasq.service")
