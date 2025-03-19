@@ -76,7 +76,7 @@ sudo nmcli con add type vlan con-name eth0.101 ifname eth0.101 dev eth0 id 101 i
 * Install and configure dnsmasq
 
 ---
-# Extra Configuration
+# Raspi Configuration
 
 To configure settings for the attached HATs, take a look at bottom of [boot/firmware/config.txt](boot/firmware/config.txt) to see an example of what needs to be done.  Make sure to enable the dtoverlays for the HATs which are installed on the system.
 
@@ -90,7 +90,7 @@ To configure settings for the attached HATs, take a look at bottom of [boot/firm
 The following debian software packages are required: atftpd ifupdown git dnsmasq ser2net microcom chromium-codecs-ffmpeg chromium-browser chromium-driver
 
 ```
-sudo apt-get install atftpd ifupdown git dnsmasq ser2net microcom chromium-codecs-ffmpeg chromium-browser chromium-driver
+sudo apt-get install tftpd-hpa ifupdown git dnsmasq ser2net microcom chromium-codecs-ffmpeg chromium-browser chromium-driver
 ```
 
 The following debian softare packages are recommended: vim
@@ -100,6 +100,19 @@ sudo apt-get install vim
 ```
 
 There are example config files in the Documentataion/RaspiOS/etc directoy.  Modify and copy those files as needed.  Afterwards, restart the services as necessary.
+
+# Other Configuration
+
+Change the permissions of /home/pi to be readable to everyone
+```
+chmod 755 /home/pi
+```
+
+Edit /etc/default/tftp-hpa to remove the --secure option
+```
+sudo vi /etc/default/tftpd-hpa
+sudo systemctl restart tftpd-hpa
+```
 
 ---
 # The Linux Kernel
