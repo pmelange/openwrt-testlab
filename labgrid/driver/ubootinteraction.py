@@ -1,3 +1,4 @@
+import re
 import attr
 from pexpect import TIMEOUT
 from time import sleep
@@ -5,7 +6,7 @@ from time import sleep
 from labgrid.factory import target_factory
 from labgrid.util import gen_marker, Timeout
 from labgrid.step import step
-from labgrid.driver import Driver
+from labgrid.driver import Driver, TFTPProviderDriver
 
 from labgrid.protocol import ConsoleProtocol
 from labgrid.util import re_vt100
@@ -48,19 +49,62 @@ class UBootInteraction(Driver):
 
     bindings = {
         "console": ConsoleProtocol,
+        "provider": TFTPProviderDriver,
         }
+    image = attr.ib(default="", validator=attr.validators.instance_of(str))
     commands = attr.ib(default=[], validator=attr.validators.instance_of(list))
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
+        self._imagepath = None
+
+    def _run(self, cmd: str, *, timeout: int = 30, codec: str = "utf-8", decodeerrors: str = "strict"):  # pylint: disable=line-too-long
+        """
+        If Uboot is in Command-Line mode: Run command cmd and return it's
+        output.
+
+        Arguments:
+        cmd - Command to run
+        """
+        # TODO: use codec, decodeerrors
+
+        prompt = self.target.get_driver("UBootDriver", activate=False).prompt
+        marker = gen_marker()
+
+        # Create multi-part command like we would do for a normal uboot.
+        # but since this simple uboot does not have an echo-command we will
+        # handle it's error message as an echo-output.
+        # additionally we are not able to get the command's return code and
+        # will always return 0.
+        cmp_command = f"echo{marker}; {cmd}; echo{marker}"
+
+        self.console.sendline(cmp_command)
+        _, before, _, _ = self.console.expect(prompt, timeout=timeout)
+
+        data = re_vt100.sub(
+            '', before.decode('utf-8'), count=1000000
+        ).replace("\r", "").split("\n")
+        data = data[1:]
+        data = data[data.index(f"Unknown command 'echo{marker}' - try 'help'") +1 :]
+        data = data[:data.index(f"Unknown command 'echo{marker}' - try 'help'")]
+        if len(data) >= 1:
+            if data[0].startswith("Unknown command '"):
+                return (data, [], 1)
+        return (data, [], 0)
 
     @step()
     def prepare(self):
-        pass
+        if self.image != "":
+            self._imagepath = self.provider.stage(self.target.env.config.get_image_path(self.image))
+            print(f"""YYYYYYY Staged to {self._imagepath}""")
 
     @step()
-    def get_commands(self):
-        return self.commands
+    def do_commands(self):
+        for command in self.commands[:-1]:
+            if self._imagepath is not None:
+                command = re.sub("\$IMAGE", self._imagepath, command)
+            self._run(command)
+        self.console.sendline(self.commands[-1])
 
     @step()
     def finish(self):

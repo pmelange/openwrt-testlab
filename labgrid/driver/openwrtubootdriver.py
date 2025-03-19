@@ -1,4 +1,5 @@
 import attr
+import re
 from pexpect import TIMEOUT
 
 from labgrid.factory import target_factory
@@ -154,40 +155,35 @@ class OpenWrtUBootDriver(UBootDriver):
                 return (data, [], 1)
         return (data, [], 0)
 
-    @step(args=["instance"])
-    def _do_instance(self, instance):
-        instance.prepare()
-        commands = instance.get_commands()
-        for command in commands[:-1]:
-            self._run(command)
-        self.console.sendline(commands[-1])
-        instance.finish()
+    @step(args=["driver"])
+    def _do_interaction(self, driver):
+        self.target.activate(driver)
+        driver.prepare()
+        driver.do_commands()
+        driver.finish()
+        self.target.deactivate(driver)
 
     @Driver.check_active
     @step()
     def boot(self):
         if self._boot is not None:
-            #self.target.activate(self._boot)
-            self._do_instance(self._boot)
+            self._do_interaction(self._boot)
         # TODO Add exception if None
 
     @Driver.check_active
     @step()
     def flash(self):
         if self._flash is not None:
-            #self.target.activate(self._flash)
-            self._do_instance(self._flash)
+            self._do_interaction(self._flash)
 
     @Driver.check_active
     @step()
     def tftpboot(self):
         if self._tftpboot is not None:
-            #self.target.activate(self._tftpboot)
-            self._do_instance(self._tftpboot)
+            self._do_interaction(self._tftpboot)
 
     @Driver.check_active
     @step()
     def bootp(self):
         if self._bootp is not None:
-            #self.target.activate(self._bootp)
-            self._do_instance(self._bootp)
+            self._do_interaction(self._bootp)
