@@ -21,3 +21,4 @@
 /dockerfiles/staging/coordinator/*
 !/dockerfiles/staging/coordinator/places_example.yaml
 /.idea
+**/firmware
