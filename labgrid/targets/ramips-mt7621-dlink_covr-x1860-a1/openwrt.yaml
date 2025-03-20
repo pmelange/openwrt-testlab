@@ -62,22 +62,22 @@ targets:
       - OpenWrtUciDriver:
           config:
             - set:
+                system:
+                  "@system[0]":
+                    hostname: "testdev02"
                 network:
                   lan:
-                    ipaddr: '10.36.198.225'
-                    netmask: '255.255.255.240'
+                    ipaddr: '192.168.102.1'
+                  wan:
+                    device: "ethernet"
             - del_list:
                 network:
                   "@device[0]":
                     ports: 'ethernet'
-                  "@device[3]":
-                    ports: 'internet'
             - add_list:
                 network:
                   "@device[0]":
                     ports: ['ethernet.102', 'internet']
-                  "@device[3]":
-                    ports: 'ethernet'
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True
@@ -86,6 +86,7 @@ targets:
 paths:
   backup: !template "$BASE/backup"
 images:
+  # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
   initramfs: "firmware/openwrt-24.10.0-ramips-mt7621-dlink_covr-x1860-a1-initramfs-kernel.bin"
   recovery: "firmware/openwrt-24.10.0-ramips-mt7621-dlink_covr-x1860-a1-squashfs-recovery.bin"
   sysupgrade: "firmware/openwrt-23.05-snapshot-r24145-db554fd450-freifunk-falter-1.4.0-ramips-mt7621-dlink_covr-x1860-a1-squashfs-sysupgrade.bin"
