@@ -79,32 +79,10 @@ targets:
                   "@device[3]":
                     ports: 'ethernet'
       - OpenWrtLuCIDriver: {}
-      - FreifunkWizardDriver:
-          address: "10.36.198.225"
-          password: "abc123"
-          network: "Freifunk Berlin"
-          hostname: "testdev02"
-          nickname: "testlabuser"
-          realname: "openwrt-testlab"
-          email: "email@address"
-          location: "Panoramastrasse 1A, 10178 Berlin"
-          lat: "52.52081970085464"
-          lon: "13.409418231737128"
-          alt: "368"
-          sharedInternet: True
-          bw_down: "60"
-          bw_up: "20"
-          stats: False
-          meship_radio0: "10.31.38.181"
-          meshmode_radio0: "80211a"
-          meship_radio1: "10.31.38.182"
-          meshmode_radio1: "80211s"
-          ssid: "testdev02.berlin.freifunk.net"
-          dhcp: "10.36.198.224/28"
       - SSHDriver:
           explicit_scp_mode: True
       - NetworkInterfaceDriver: {}
-      - OpenWrtFlashBootStrategy: {}
+      - OpenWrtStrategy: {}
 paths:
   backup: !template "$BASE/backup"
 images:

@@ -31,8 +31,8 @@ class Status(enum.Enum):
 
 @target_factory.reg_driver
 @attr.s(eq=False)
-class OpenWrtFlashBootStrategy(Strategy):
-    """OpenWrtFlashBootStrategy - Strategy to boot from flash"""
+class FreifunkStrategy(Strategy):
+    """FreifunkFlashBootStrategy - Strategy to boot from flash"""
     bindings = {
         "power": "PowerProtocol",
         'reset': "ButtonProtocol",
