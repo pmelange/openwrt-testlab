@@ -25,7 +25,7 @@ testdev{{devnum}}:
     username: root
   TFTPProvider:
     internal: "/srv/tftp/testdev{{devnum}}"
-    external: "testdev{{devnum}}/"
+    external: "/srv/tftp/testdev{{devnum}}"
 {% endfor %}
 aux1:
   SysfsGPIO:
