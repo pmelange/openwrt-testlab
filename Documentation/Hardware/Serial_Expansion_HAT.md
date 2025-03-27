@@ -31,6 +31,13 @@ The sc16is752 needs an extra parameter set in ```/boot/firmware/config.txt``` to
 dtparam=i2c_arm_baudrate=400000
 ```
 
+To automatically activate gpio pins on the main 40 pin header, the following can be added to ```/boot/firmware/config.txt```.  For more information, read [this](https://www.raspberrypi.com/documentation/computers/config_txt.html#gpio-control).
+
+```
+# turn on aux1 and aux2 per default
+gpio=25,26=op,dl
+```
+
 To install the kernel module for the Serial Expansion HAT, the file ```/boot/firmware/config.txt``` needs to be edited to add the following _(modify the interrupt pin and address as needed)_.  
 
 NOTE: the oder of the ```dtoverlay``` entries seems to be important in so far as to the ordering of ```/dev/ttySCX``` and which gpiochipY is assigned to which HAT.   In this example, the HAT with address 0x48 is assigned ```/dev/ttySC0``` and ```/dev/ttySC1``` along with gpiochip2 while the HAT with address 0x4c is assigned ```/dev/ttySC8``` ```/dev/ttySC9``` and gpiochip6.
