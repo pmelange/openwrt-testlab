@@ -70,10 +70,10 @@ To configure settings for the attached HATs, take a look at bottom of [boot/firm
 ---
 # Software Packages
 
-The following debian software packages are required: tftpd-hpa ifupdown git dnsmasq ser2net microcom chromium-codecs-ffmpeg chromium-browser chromium-driver
+The following debian software packages are required: tftpd-hpa gir1.2-nm-1.0 ifupdown git dnsmasq ser2net microcom chromium-codecs-ffmpeg chromium-browser chromium-driver
 
 ```
-sudo apt-get install tftpd-hpa ifupdown git dnsmasq ser2net microcom chromium-codecs-ffmpeg chromium-browser chromium-driver
+sudo apt-get install tftpd-hpa gir1.2-nm-1.0 ifupdown git dnsmasq ser2net microcom chromium-codecs-ffmpeg chromium-browser chromium-driver
 ```
 
 The following debian softare packages are recommended: vim
