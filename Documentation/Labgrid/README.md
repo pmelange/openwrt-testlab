@@ -8,12 +8,17 @@ git clone https://github.com/pmelange/labgrid.git
 git clone https://github.com/pmelange/openwrt-testlab.git
 ```
 
+" Change to the openwrt-testlab branch in the labgrid repo
+```
+git -C labgrid checkout openwrt-testlab
+```
+
 * Create the labgrid virtual environment
 ```
 sudo python3 -m venv /opt/labgrid-venv
 ```
 
-* Copy the exporter.yaml from the openwrt-testlab repo to /etc/labgrid
+* Copy the exporter.yaml from the openwrt-testlab repo to /etc/labgrid. Modify the file as necessary.
 
 ```
 sudo mkdir /etc/labgrid
@@ -33,11 +38,11 @@ sudo systemd-sysusers
 cd /opt
 sudo chown -R labgrid:labgrid labgrid-venv
 sudo chmod -R g+w labgrid-venv
-sudo usermod -a -G labgrid pi   # change username as needed
-sudo usermod -g labgrid pi      # optional to make labgrid the default group
+sudo usermod -a -G labgrid pi   # add user pi to the labgrid group
+sudo usermod -g labgrid pi      # recommended to make labgrid the default group
 ```
 
-* Log out and back in again so that your user is now a member of the labgrid group.
+* Log out and back in again so that your user is now a member of the labgrid group with the '''groups''' command.
 
 * From within the labgrid repo, change to the openwrt-testlab branch and install labgrid
 
@@ -93,6 +98,6 @@ sudo systemctl start nftables.service
 * Create the labgrid places with the script openwrt-testlab/Documentation/RaspiOS/create-places.sh.  Modify the file as necessary, such as the range in the for loop, depending on how many ports are on the system.
 
 ```
-openwrt-testlab/Documentation/RaspiOS/create-places.sh
+openwrt-testlab/Documentation/Labgrid/create-places.sh
 ```
 

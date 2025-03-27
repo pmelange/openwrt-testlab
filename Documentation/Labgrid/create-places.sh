@@ -11,6 +11,7 @@ for i in $(seq 1 10); do
 		labgrid-client -p port$i add-match $(hostname)/testdev$j/NetworkSerialPort
 		labgrid-client -p port$i add-match $(hostname)/testdev$j/RemoteNetworkInterface
 		labgrid-client -p port$i add-match $(hostname)/testdev$j/NetworkService
+		labgrid-client -p port$i add-match $(hostname)/testdev$j/RemoteTFTPProvider
 	fi
 	
 done
