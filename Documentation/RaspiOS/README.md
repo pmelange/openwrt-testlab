@@ -59,23 +59,6 @@ auto apt-get autoremove
 ```
 
 ---
-# Network Configuration
-
-Labgrid uses NetworkManager, so to set up the networking the following may be good to do:
-
-* Create a network for the WAN ports of the attached openwrt test devices. Note, you may need to delete any existing NetworkManager connections configured for eth0 with something similar to ```sudo nmcli con delete con-name "Wired connection1"```
-```
-sudo nmcli con add con-name eth0 ifname eth0 type ethernet ip4 192.168.0.1/24
-```
-
-* Create interfaces for each attached openwrt test device which will get an IP address from the test device's LAN.  Repeat this (from eth0.101 to eth0.110) for each attached test device
-```
-sudo nmcli con add type vlan con-name eth0.101 ifname eth0.101 dev eth0 id 101 ipv4.route-metric 1000 ipv4.ignore-auto-dns True connection.autoconnect-retries 0
-```
-
-* Install and configure dnsmasq
-
----
 # Raspi Configuration
 
 To configure settings for the attached HATs, take a look at bottom of [boot/firmware/config.txt](boot/firmware/config.txt) to see an example of what needs to be done.  Make sure to enable the dtoverlays for the HATs which are installed on the system.
@@ -87,7 +70,7 @@ To configure settings for the attached HATs, take a look at bottom of [boot/firm
 ---
 # Software Packages
 
-The following debian software packages are required: atftpd ifupdown git dnsmasq ser2net microcom chromium-codecs-ffmpeg chromium-browser chromium-driver
+The following debian software packages are required: tftpd-hpa ifupdown git dnsmasq ser2net microcom chromium-codecs-ffmpeg chromium-browser chromium-driver
 
 ```
 sudo apt-get install tftpd-hpa ifupdown git dnsmasq ser2net microcom chromium-codecs-ffmpeg chromium-browser chromium-driver
@@ -103,21 +86,17 @@ There are example config files in the Documentataion/RaspiOS/etc directoy.  Modi
 
 # Other Configuration
 
+Follow the instruction to set up [labgrid](../Labgrid/README.md) first, then continue here.
+
 Change the permissions of /home/pi to be readable to everyone
 ```
 chmod 755 /home/pi
 ```
 
-Edit /etc/default/tftp-hpa to remove the --secure option
-```
-sudo vi /etc/default/tftpd-hpa
-sudo systemctl restart tftpd-hpa
-```
-
 ---
 # The Linux Kernel
 
-Now it is time to patch and build a new linux kernel.  The instructions can be found [here](https://www.raspberrypi.com/documentation/computers/linux_kernel.html) and it is important to apply the patch [0001-sc16is7xx.c-increase-SC16IS7XX_MAX_DEVS-to-16.patch](0001-sc16is7xx.c-increase-SC16IS7XX_MAX_DEVS-to-16.patch) before starting the build.  
+If more than four Serial Expansion HATs are installed, then it is necessary to patch and build a new linux kernel.  The instructions can be found [here](https://www.raspberrypi.com/documentation/computers/linux_kernel.html) and it is important to apply the patch [0001-sc16is7xx.c-increase-SC16IS7XX_MAX_DEVS-to-16.patch](0001-sc16is7xx.c-increase-SC16IS7XX_MAX_DEVS-to-16.patch) before starting the build.  
 * This patch is needed when more than 4 of the Serial Expansion HATs are used.  With the MAX_DEVS now set to 16, up to 8 of the HATs can be used.  If more are needed, adjust the MAX_DEVS accordingly.
 * Read more about the [Serial Expansion HAT](../Hardware/Serial_Expansion_HAT.md).
 
