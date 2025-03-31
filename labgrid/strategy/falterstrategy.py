@@ -31,8 +31,8 @@ class Status(enum.Enum):
 
 @target_factory.reg_driver
 @attr.s(eq=False)
-class FreifunkStrategy(Strategy):
-    """FreifunkFlashBootStrategy - Strategy to boot from flash"""
+class FalterStrategy(Strategy):
+    """FalterStrategy - Strategy to boot from flash"""
     bindings = {
         "power": "PowerProtocol",
         'reset': "ButtonProtocol",
@@ -224,6 +224,12 @@ class FreifunkStrategy(Strategy):
                     self.ffwizard.configure()
                     self.target.deactivate(self.ffwizard)
                     self._ffwizard = True
+                    # Wait for "reboot: Restarting system" on console
+                    expectations = ["reboot: Restarting system", TIMEOUT]
+                    index, _, _, _ = self.console.expect(expectations, 
+                                                         timeout=120)
+                    if index != 0:
+                        raise StrategyError("Router not rebooting after wizard")
                     # ffwizard is complete and reboots automatically
                     self.exporter_release_lease()
                     self.target.deactivate(self.shell)

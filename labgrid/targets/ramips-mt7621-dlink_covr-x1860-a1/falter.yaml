@@ -104,7 +104,7 @@ targets:
       - SSHDriver:
           explicit_scp_mode: True
       - NetworkInterfaceDriver: {}
-      - FreifunkStrategy: {}
+      - FalterStrategy: {}
 paths:
   backup: !template "$BASE/backup"
 images:
@@ -116,4 +116,4 @@ images:
   restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py
-  - ../../freifunk-testlab.py
+  - ../../falter-testlab.py
