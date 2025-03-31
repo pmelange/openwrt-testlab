@@ -7,7 +7,7 @@ targets:
       - olsr
     resources:
       - RemotePlace:
-          name: port2
+          name: port5
     drivers:
       - GpioDigitalOutputDriver:
           name: powerdriver
@@ -32,7 +32,7 @@ targets:
       - UBootInteractionFlash:
           image: "recovery"
           commands:
-            - setenv ipaddr 192.168.0.3
+            - setenv ipaddr 192.168.0.105
             - setenv serverip 192.168.0.1
             - tftpboot $IMAGE
             - nand erase 0x1c0000 0xec0000
@@ -41,14 +41,14 @@ targets:
       - UBootInteractionTftpboot:
           image: "initramfs"
           commands:
-            - setenv ipaddr 192.168.0.3
+            - setenv ipaddr 192.168.0.105
             - setenv serverip 192.168.0.1
             - tftpboot $IMAGE
             - bootm
       - UBootInteractionBootp:
           image: "initramfs"
           mac: "a2:db:82:64:59:fd"
-          bootpip: "192.168.0.3"
+          bootpip: "192.168.0.105"
           commands:
             - bootp
             - bootm
@@ -64,7 +64,7 @@ targets:
             - set:
                 network:
                   lan:
-                    ipaddr: '10.36.198.225'
+                    ipaddr: '10.36.248.65'
                     netmask: '255.255.255.240'
             - del_list:
                 network:
@@ -75,12 +75,12 @@ targets:
             - add_list:
                 network:
                   "@device[0]":
-                    ports: ['ethernet.102', 'internet']
+                    ports: ['ethernet.105', 'internet']
                   "@device[3]":
                     ports: 'ethernet'
       - OpenWrtLuCIDriver: {}
       - FreifunkWizardDriver:
-          address: "10.36.198.225"
+          address: "10.36.248.65"
           password: "abc123"
           network: "Freifunk Berlin"
           hostname: "testdev02"
@@ -95,12 +95,12 @@ targets:
           bw_down: "60"
           bw_up: "20"
           stats: False
-          meship_radio0: "10.31.38.181"
+          meship_radio0: "10.36.251.64"
           meshmode_radio0: "80211a"
-          meship_radio1: "10.31.38.182"
+          meship_radio1: "10.36.251.65"
           meshmode_radio1: "80211s"
           ssid: "testdev02.berlin.freifunk.net"
-          dhcp: "10.36.198.224/28"
+          dhcp: "10.36.248.64/28"
       - SSHDriver:
           explicit_scp_mode: True
       - NetworkInterfaceDriver: {}

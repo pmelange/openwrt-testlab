@@ -7,7 +7,7 @@ targets:
       - olsr
     resources:
       - RemotePlace:
-          name: port5
+          name: port2
     drivers:
       - GpioDigitalOutputDriver:
           name: powerdriver
@@ -32,7 +32,7 @@ targets:
       - UBootInteractionFlash:
           image: "recovery"
           commands:
-            - setenv ipaddr 192.168.0.105
+            - setenv ipaddr 192.168.0.102
             - setenv serverip 192.168.0.1
             - tftpboot $IMAGE
             - nand erase 0x1c0000 0xd40000
@@ -41,14 +41,14 @@ targets:
       - UBootInteractionTftpboot:
           image: "initramfs"
           commands:
-            - setenv ipaddr 192.168.0.105
+            - setenv ipaddr 192.168.0.102
             - setenv serverip 192.168.0.1
             - tftpboot $IMAGE
             - bootm
       - UBootInteractionBootp:
           image: "initramfs"
           mac: "a2:db:82:64:59:fd"
-          bootpip: "192.168.0.105"
+          bootpip: "192.168.0.102"
           commands:
             - bootp
             - bootm
@@ -67,7 +67,7 @@ targets:
                     hostname: "testdev02"
                 network:
                   lan:
-                    ipaddr: '192.168.105.1'
+                    ipaddr: '192.168.102.1'
                   wan:
                     device: "ethernet"
             - del_list:
@@ -77,7 +77,7 @@ targets:
             - add_list:
                 network:
                   "@device[0]":
-                    ports: ['ethernet.105', 'internet']
+                    ports: ['ethernet.102', 'internet']
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True
