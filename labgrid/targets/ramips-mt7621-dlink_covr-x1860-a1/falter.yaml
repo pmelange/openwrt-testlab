@@ -83,7 +83,7 @@ targets:
           address: "10.36.248.65"
           password: "abc123"
           network: "Freifunk Berlin"
-          hostname: "testdev02"
+          hostname: "testdev05"
           nickname: "testlabuser"
           realname: "openwrt-testlab"
           email: "email@address"
@@ -99,7 +99,7 @@ targets:
           meshmode_radio0: "80211a"
           meship_radio1: "10.36.251.65"
           meshmode_radio1: "80211s"
-          ssid: "testdev02.berlin.freifunk.net"
+          ssid: "testdev05.berlin.freifunk.net"
           dhcp: "10.36.248.64/28"
       - SSHDriver:
           explicit_scp_mode: True
