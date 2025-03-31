@@ -156,4 +156,4 @@ class UBootInteractionBootp(UBootInteraction):
             fd.close()
             con.put_file(f"""/tmp/{filename}""", "/tmp")
             con.run(f"""sudo mv /tmp/{filename} /etc/dnsmasq.d""")
-            con.run("sudo systemctl reload dnsmasq.service")
+            con.run("sudo systemctl restart dnsmasq.service")
