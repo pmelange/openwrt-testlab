@@ -1,0 +1,86 @@
+targets:
+  main:
+    features:
+      - console
+      - wifi
+      - online
+      - olsr
+    resources:
+      - RemotePlace:
+          name: port1
+    drivers:
+      - GpioDigitalOutputDriver:
+          name: powerdriver
+          bindings:
+            gpio: power # resouce name
+      - GpioDigitalOutputDriver:
+          name: resetdriver
+          bindings:
+            gpio: reset # resource name
+      - DigitalOutputPowerDriver:
+          bindings:
+            output: powerdriver
+      - DigitalOutputButtonDriver:
+          delay: 7.0
+          bindings:
+            output: resetdriver
+      - SerialDriver: {}
+      - TFTPProviderDriver: {}
+      - UBootInteractionBoot:
+          commands:
+            - boot
+      - UBootInteractionTftpboot:
+          image: "initramfs"
+          commands:
+            - net_init
+            - setenv ipaddr 192.168.0.4
+            - setenv serverip 192.168.0.1
+            - tftpboot $IMAGE
+            - bootm
+      - UBootInteractionBootp:
+          image: "initramfs"
+          mac: "44:d4:37:8c:13:78"
+          bootpip: "192.168.0.4"
+          commands:
+            - net_init
+            - bootp
+            - bootm
+      - OpenWrtUBootDriver:
+          prompt: '->'
+          boot_expression: 'stop autoboot'
+          boot_secret: 'a'
+          boot_secret_nolf: True
+      - OpenWrtShellDriver:
+          keyfile: "~/.ssh/id_rsa.pub"
+      - OpenWrtUciDriver:
+          config:
+            - set:
+                system:
+                  "@system[0]":
+                    hostname: "testdev02"
+                network:
+                  lan:
+                    ipaddr: '192.168.101.1'
+            - del_list:
+                network:
+                  "@device[0]":
+                    ports: 'lan'
+            - add_list:
+                network:
+                  "@device[0]":
+                    ports: ['wan.101']
+      - OpenWrtLuCIDriver: {}
+      - SSHDriver:
+          explicit_scp_mode: True
+      - NetworkInterfaceDriver: {}
+      - OpenWrtStrategy: {}
+paths:
+  backup: !template "$BASE/backup"
+images:
+  # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
+  initramfs: "firmware/openwrt-24.10.1-ramips-mt7621-genexis_pulse-ex400-initramfs-kernel.bin"
+  recovery: "firmware/openwrt-24.10.1-ramips-mt7621-genexis_pulse-ex400-initramfs-kernel.bin"
+  sysupgrade: "firmware/openwrt-24.10.1-ramips-mt7621-genexis_pulse-ex400-sysupgrade.bin"
+  restore: "backup/restore.tar.gz"
+imports:
+  - ../../openwrt-testlab.py
