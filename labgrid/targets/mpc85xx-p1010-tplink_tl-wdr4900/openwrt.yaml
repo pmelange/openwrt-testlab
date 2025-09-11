@@ -1,0 +1,99 @@
+targets:
+  main:
+    features:
+      - console
+      - wifi
+      - online
+      - olsr
+    resources:
+      - RemotePlace:
+          name: port3
+    drivers:
+      - GpioDigitalOutputDriver:
+          name: powerdriver
+          bindings:
+            gpio: power # resouce name
+      - GpioDigitalOutputDriver:
+          name: resetdriver
+          bindings:
+            gpio: reset # resource name
+      - DigitalOutputPowerDriver:
+          bindings:
+            output: powerdriver
+      - DigitalOutputButtonDriver:
+          delay: 7.0
+          bindings:
+            output: resetdriver
+      - SerialDriver: {}
+      - TFTPProviderDriver: {}
+      - UBootInteractionBoot:
+          commands:
+            - boot
+      - UBootInteractionFlash:
+          image: "recovery"
+          commands:
+            - setenv ipaddr 192.168.0.103
+            - setenv serverip 192.168.0.1
+            - tftpboot $IMAGE
+            - nand erase 0x1c0000 0xd40000
+            - nand write 0x80010000 0x1c0000 0xd40000
+            - boot
+      - UBootInteractionTftpboot:
+          image: "factory"
+          commands:
+            - setenv ipaddr 192.168.0.103
+            - setenv serverip 192.168.0.1
+            - tftpboot $IMAGE
+            - sf probe 0
+            - sf erase 0x60000 0xf80000
+            - sf write 0x1000000 0x60000 0xf80000
+            - boot
+      - UBootInteractionBootp:
+          image: "initramfs"
+          mac: "7e:87:3c:81:4f:61"
+          bootpip: "192.168.0.103"
+          commands:
+            - bootp
+            - bootm
+      - OpenWrtUBootDriver:
+          prompt: '=>'
+          boot_expression: 'seconds'
+          boot_secret: 'vl'
+          boot_secret_nolf: True
+      - OpenWrtShellDriver:
+          keyfile: "~/.ssh/id_rsa.pub"
+      - OpenWrtUciDriver:
+          config:
+            - set:
+                system:
+                  "@system[0]":
+                    hostname: "testdev03"
+                network:
+                  lan:
+                    ipaddr: '192.168.103.1'
+                  wan:
+                    device: "lan1"
+                  wan6:
+                    device: "lan1"
+            - del_list:
+                network:
+                  "@device[0]":
+                    ports: 'lan1'
+            - add_list:
+                network:
+                  "@device[0]":
+                    ports: ['lan1.103', 'wan']
+      - OpenWrtLuCIDriver: {}
+      - SSHDriver:
+          explicit_scp_mode: True
+      - NetworkInterfaceDriver: {}
+      - OpenWrtStrategy: {}
+paths:
+  backup: !template "$BASE/backup"
+images:
+  # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
+  factory: "firmware/openwrt-23.05-snapshot-r24145-db554fd450-freifunk-falter-1.4.0-mpc85xx-p1010-tplink_tl-wdr4900-v1-squashfs-factory.bin"
+  sysupgrade: "firmware/openwrt-23.05-snapshot-r24145-db554fd450-freifunk-falter-1.4.0-mpc85xx-p1010-tplink_tl-wdr4900-v1-squashfs-sysupgrade.bin"
+  restore: "backup/restore.tar.gz"
+imports:
+  - ../../openwrt-testlab.py
