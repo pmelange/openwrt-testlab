@@ -47,7 +47,7 @@ targets:
             - bootm
       - UBootInteractionBootp:
           image: "initramfs"
-          mac: "a2:db:82:64:59:fd"
+          mac: "7e:87:3c:81:4f:61"
           bootpip: "192.168.0.105"
           commands:
             - bootp
@@ -64,7 +64,7 @@ targets:
             - set:
                 system:
                   "@system[0]":
-                    hostname: "testdev02"
+                    hostname: "testdev05"
                 network:
                   lan:
                     ipaddr: '192.168.105.1'
