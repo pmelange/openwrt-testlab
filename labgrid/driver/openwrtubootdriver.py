@@ -78,7 +78,7 @@ class OpenWrtUBootDriver(UBootDriver):
         last_before = None
 
         while True:
-            index, before, _, _ =  self.console.expect(expectations, timeout=2)
+            index, before, _, _ =  self.console.expect(expectations, timeout=self.login_timeout)
 
             if index == 0:
                 # we have the uboot prompt
