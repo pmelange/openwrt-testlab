@@ -1,0 +1,88 @@
+targets:
+  main:
+    features:
+      - console
+      - wifi
+      - online
+      - olsr
+    resources:
+      - RemotePlace:
+          name: port2
+    drivers:
+      - GpioDigitalOutputDriver:
+          name: powerdriver
+          bindings:
+            gpio: power # resouce name
+      - GpioDigitalOutputDriver:
+          name: resetdriver
+          bindings:
+            gpio: reset # resource name
+      - DigitalOutputPowerDriver:
+          bindings:
+            output: powerdriver
+      - DigitalOutputButtonDriver:
+          delay: 7.0
+          bindings:
+            output: resetdriver
+      - SerialDriver: {}
+      - TFTPProviderDriver: {}
+      - UBootInteractionBoot:
+          commands:
+            - run fritzboot
+      - UBootInteractionTftpboot:
+          image: "initramfs"
+          commands:
+            - setenv ipaddr 192.168.0.102
+            - setenv serverip 192.168.0.1
+            - tftpboot $IMAGE
+            - bootm
+      - UBootInteractionBootp:
+          image: "initramfs"
+          mac: "44:4e:6d:af:9c:57"
+          bootpip: "192.168.0.102"
+          commands:
+            - bootp
+            - bootm
+      - OpenWrtUBootDriver:
+          prompt: '\(FRITZ7530\) #'
+          boot_expression: 'stop autoboot'
+          boot_secret: 'a'
+          boot_secret_nolf: True
+      - OpenWrtShellDriver:
+          keyfile: "~/.ssh/id_rsa.pub"
+      - OpenWrtUciDriver:
+          config:
+            - set:
+                system:
+                  "@system[0]":
+                    hostname: "testdev02"
+                network:
+                  lan:
+                    ipaddr: '192.168.102.1'
+                  wan:
+                    proto: "dhcp"
+                    device: "lan1"
+                  wan6:
+                    device: "lan1"
+            - del_list:
+                network:
+                  "@device[0]":
+                    ports: 'lan1'
+            - add_list:
+                network:
+                  "@device[0]":
+                    ports: 'lan1.102'
+      - OpenWrtLuCIDriver: {}
+      - SSHDriver:
+          explicit_scp_mode: True
+      - NetworkInterfaceDriver: {}
+      - OpenWrtStrategy: {}
+paths:
+  backup: !template "$BASE/backup"
+images:
+  # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
+  sysupgrade: "firmware/openwrt-24.10.2-ipq40xx-generic-avm_fritzbox-7530-squashfs-sysupgrade.bin"
+  initramfs: "firmware/openwrt-24.10.2-ipq40xx-generic-avm_fritzbox-7530-initramfs-uImage.itb"
+  restore: "backup/restore.tar.gz"
+imports:
+  - ../../openwrt-testlab.py
