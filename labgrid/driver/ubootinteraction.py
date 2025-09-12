@@ -144,13 +144,10 @@ class UBootInteractionBootp(UBootInteraction):
         if self.mac != "" and self.bootpip != "":
             # set up dnsmasq on the exporter to set up bootp
             con = sshmanager.get(self.provider.provider.host)
-            filename = (self.mac.replace(":", "") + "-dnsmasq.conf")
-            config = ("dhcp-host=" +
-                      self.mac + "," +
-                      self.bootpip + ",set:" +
-                      self.mac.replace(":", "") + "\ndhcp-option=tag:" +
-                      self.mac.replace(":", "") + ",option:bootfile-name," +
-                      self._imagepath + "\n")
+            place = self.target.env.get_target().get_resource("RemotePlace").name
+            filename = (place + "-dnsmasq.conf")
+            config = ("dhcp-host=" + self.mac + "," + self.bootpip + ",set:" + place + 
+                      "\ndhcp-option=tag:" + place + ",option:bootfile-name," + self._imagepath + "\n")
             fd = open(f"""/tmp/{filename}""", "w")
             fd.write(config)
             fd.close()
