@@ -16,4 +16,5 @@ from driver.openwrtshelldriver import OpenWrtShellDriver
 from driver.ubootinteraction import UBootInteractionBoot, \
                                     UBootInteractionFlash, \
                                     UBootInteractionTftpboot, \
-                                    UBootInteractionBootp
+                                    UBootInteractionBootp, \
+                                    MikrotikUBootInteractionBootp
