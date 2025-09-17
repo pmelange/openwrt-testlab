@@ -31,6 +31,7 @@ targets:
             - run fritzboot
       - UBootInteractionTftpboot:
           image: "initramfs"
+          sleep: 3
           commands:
             - setenv ipaddr 192.168.0.102
             - setenv serverip 192.168.0.1
@@ -40,6 +41,7 @@ targets:
           image: "initramfs"
           mac: "44:4e:6d:af:9c:57"
           bootpip: "192.168.0.102"
+          sleep: 3
           commands:
             - bootp
             - bootm
