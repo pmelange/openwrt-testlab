@@ -81,6 +81,8 @@ class OpenWrtUBootDriver(UBootDriver):
                         TIMEOUT]
         last_before = None
 
+        if self.hold_reset_before_uboot:
+            self.reset.press()
         if self.cycle_before_uboot:
             self.power.cycle()
         while True:
@@ -123,6 +125,9 @@ class OpenWrtUBootDriver(UBootDriver):
 
         for command in self.init_commands:
             self._run(command)
+
+        if self.hold_reset_before_uboot:
+            self.reset.release()
 
     def _run(self, cmd: str, *, timeout: int = 30, codec: str = "utf-8", decodeerrors: str = "strict"):  # pylint: disable=line-too-long
         """
