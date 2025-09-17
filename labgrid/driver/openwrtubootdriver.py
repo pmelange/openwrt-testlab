@@ -7,7 +7,7 @@ from labgrid.util import gen_marker, Timeout
 from labgrid.step import step
 from labgrid.driver import Driver
 
-from labgrid.protocol import ConsoleProtocol
+from labgrid.protocol import ConsoleProtocol, PowerProtocol, ButtonProtocol
 from labgrid.driver import UBootDriver
 from labgrid.util import re_vt100
 from driver.ubootinteraction import UBootInteractionBoot, UBootInteractionFlash, UBootInteractionTftpboot, UBootInteractionBootp
@@ -52,6 +52,8 @@ class OpenWrtUBootDriver(UBootDriver):
     """
     bindings = {
             "console": ConsoleProtocol,
+            "power": PowerProtocol,
+            "reset": ButtonProtocol,
             "_boot": {UBootInteractionBoot, None},
             "_flash": {UBootInteractionFlash, None},
             "_tftpboot": {UBootInteractionTftpboot, None},
@@ -62,6 +64,8 @@ class OpenWrtUBootDriver(UBootDriver):
     boot_secret = attr.ib(default="a", validator=attr.validators.instance_of(str))
     boot_secret_nolf = attr.ib(default=False, validator=attr.validators.instance_of(bool))
     login_timeout = attr.ib(default=60, validator=attr.validators.instance_of(int))
+    cycle_before_uboot = attr.ib(default=False, validator=attr.validators.instance_of(bool))
+    hold_reset_before_uboot = attr.ib(default=False, validator=attr.validators.instance_of(bool))
 
     @step()
     def _await_prompt(self):
@@ -77,6 +81,8 @@ class OpenWrtUBootDriver(UBootDriver):
                         TIMEOUT]
         last_before = None
 
+        if self.cycle_before_uboot:
+            self.power.cycle()
         while True:
             index, before, _, _ =  self.console.expect(expectations, timeout=self.login_timeout)
 

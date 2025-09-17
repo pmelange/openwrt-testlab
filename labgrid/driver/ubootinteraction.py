@@ -53,13 +53,14 @@ class UBootInteraction(Driver):
         "provider": TFTPProviderDriver,
         }
     image = attr.ib(default="", validator=attr.validators.instance_of(str))
+    sleep = attr.ib(default=0, validator=attr.validators.instance_of(int))
     commands = attr.ib(default=[], validator=attr.validators.instance_of(list))
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
         self._imagepath = None
 
-    def _run(self, cmd: str, *, timeout: int = 30, codec: str = "utf-8", decodeerrors: str = "strict"):  # pylint: disable=line-too-long
+    def _run(self, cmd: str, *, timeout: int = 120, codec: str = "utf-8", decodeerrors: str = "strict"):  # pylint: disable=line-too-long
         """
         If Uboot is in Command-Line mode: Run command cmd and return it's
         output.
@@ -97,6 +98,8 @@ class UBootInteraction(Driver):
     def prepare(self):
         if self.image != "":
             self._imagepath = self.provider.stage(self.target.env.config.get_image_path(self.image))
+        if self.sleep > 0:
+            sleep(self.sleep)
 
     @step()
     def do_commands(self):

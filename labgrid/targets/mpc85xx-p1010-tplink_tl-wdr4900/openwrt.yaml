@@ -30,16 +30,19 @@ targets:
           commands:
             - boot
       - UBootInteractionFlash:
-          image: "recovery"
+          image: "factory"
+          sleep: 1
           commands:
             - setenv ipaddr 192.168.0.103
             - setenv serverip 192.168.0.1
             - tftpboot $IMAGE
-            - nand erase 0x1c0000 0xd40000
-            - nand write 0x80010000 0x1c0000 0xd40000
+            - sf probe 0
+            - sf erase 0x60000 0xf80000
+            - sf write 0x1000000 0x60000 0xf80000
             - boot
       - UBootInteractionTftpboot:
           image: "factory"
+          sleep: 1
           commands:
             - setenv ipaddr 192.168.0.103
             - setenv serverip 192.168.0.1
@@ -49,17 +52,22 @@ targets:
             - sf write 0x1000000 0x60000 0xf80000
             - boot
       - UBootInteractionBootp:
-          image: "initramfs"
-          mac: "7e:87:3c:81:4f:61"
+          image: "factory"
+          sleep: 1
+          mac: "00:04:9f:ef:01:01"
           bootpip: "192.168.0.103"
           commands:
             - bootp
-            - bootm
+            - sf probe 0
+            - sf erase 0x60000 0xf80000
+            - sf write 0x1000000 0x60000 0xf80000
+            - boot
       - OpenWrtUBootDriver:
           prompt: '=>'
-          boot_expression: 'seconds'
-          boot_secret: 'vl'
+          boot_expression: 'Autobooting in'
+          boot_secret: 'lv'
           boot_secret_nolf: True
+          cycle_before_uboot: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
       - OpenWrtUciDriver:
@@ -92,8 +100,8 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
-  factory: "firmware/openwrt-23.05-snapshot-r24145-db554fd450-freifunk-falter-1.4.0-mpc85xx-p1010-tplink_tl-wdr4900-v1-squashfs-factory.bin"
-  sysupgrade: "firmware/openwrt-23.05-snapshot-r24145-db554fd450-freifunk-falter-1.4.0-mpc85xx-p1010-tplink_tl-wdr4900-v1-squashfs-sysupgrade.bin"
+  factory: "firmware/openwrt-24.10.2-mpc85xx-p1010-tplink_tl-wdr4900-v1-squashfs-factory.bin"
+  sysupgrade: "firmware/openwrt-24.10.2-mpc85xx-p1010-tplink_tl-wdr4900-v1-squashfs-sysupgrade.bin"
   restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py
