@@ -7,7 +7,7 @@ targets:
       - olsr
     resources:
       - RemotePlace:
-          name: port9
+          name: port1
     drivers:
       - GpioDigitalOutputDriver:
           name: powerdriver
@@ -28,35 +28,28 @@ targets:
       - TFTPProviderDriver: {}
       - UBootInteractionBoot:
           commands:
-            - boot
-      - UBootInteractionFlash:
-          image: "recovery"
-          commands:
-            - setenv ipaddr 192.168.0.105
-            - setenv serverip 192.168.0.1
-            - tftpboot $IMAGE
-            - nand erase 0x1c0000 0xd40000
-            - nand write 0x80010000 0x1c0000 0xd40000
-            - boot
+            - mtkautoboot
       - UBootInteractionTftpboot:
           image: "initramfs"
           commands:
-            - setenv ipaddr 192.168.0.105
+            - setenv ipaddr 192.168.0.101
             - setenv serverip 192.168.0.1
             - tftpboot $IMAGE
             - bootm
       - UBootInteractionBootp:
           image: "initramfs"
-          mac: "a2:db:82:64:59:fd"
-          bootpip: "192.168.0.105"
+          mac: "ENV ethaddr"
+          bootpip: "192.168.0.101"
           commands:
             - bootp
             - bootm
       - OpenWrtUBootDriver:
-          prompt: '=>'
-          boot_expression: 'stop autoboot'
-          boot_secret: 'a'
+          prompt: 'MT7981>'
+          boot_expression: 'RESET button is pressed'
+          boot_secret: '\x03'
           boot_secret_nolf: True
+          cycle_before_uboot: True
+          hold_reset_before_uboot: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
       - OpenWrtUciDriver:
@@ -64,20 +57,14 @@ targets:
             - set:
                 system:
                   "@system[0]":
-                    hostname: "testdev02"
+                    hostname: "testdev01"
                 network:
                   lan:
-                    ipaddr: '192.168.105.1'
-                  wan:
-                    device: "ethernet"
-            - del_list:
-                network:
-                  "@device[0]":
-                    ports: 'ethernet'
+                    ipaddr: '192.168.101.1'
             - add_list:
                 network:
                   "@device[0]":
-                    ports: ['ethernet.105', 'internet']
+                    ports: 'wan.101'
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True
@@ -87,9 +74,8 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
-  initramfs: "firmware/openwrt-24.10.0-ramips-mt7621-dlink_covr-x1860-a1-initramfs-kernel.bin"
-  recovery: "firmware/openwrt-24.10.0-ramips-mt7621-dlink_covr-x1860-a1-squashfs-recovery.bin"
-  sysupgrade: "firmware/openwrt-23.05-snapshot-r24145-db554fd450-freifunk-falter-1.4.0-ramips-mt7621-dlink_covr-x1860-a1-squashfs-sysupgrade.bin"
+  initramfs: "firmware/openwrt-24.10.2-mediatek-filogic-cudy_wr3000-v1-initramfs-kernel.bin"
+  sysupgrade: "firmware/openwrt-24.10.2-mediatek-filogic-cudy_wr3000-v1-squashfs-sysupgrade.bin"
   restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py
