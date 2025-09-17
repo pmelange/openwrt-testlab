@@ -145,6 +145,9 @@ class UBootInteractionBootp(UBootInteraction):
         super().prepare() # set up tftp
 
         if self.mac != "" and self.bootpip != "":
+            if re.match("^ENV", self.mac):
+                result, _, _ = self._run("printenv " + self.mac[4:])
+                self.mac = result[0].split("=", 1)[1]
             # set up dnsmasq on the exporter to set up bootp
             con = sshmanager.get(self.provider.provider.host)
             place = self.target.env.get_target().get_resource("RemotePlace").name
@@ -156,4 +159,6 @@ class UBootInteractionBootp(UBootInteraction):
             fd.close()
             con.put_file(f"""/tmp/{filename}""", "/tmp")
             con.run(f"""sudo mv /tmp/{filename} /etc/dnsmasq.d""")
+            con.run(f"""grep -v {self.bootpip} /var/lib/misc/dnsmasq.leases > /tmp/dnsmasq.leases""")
+            con.run("sudo mv /tmp/dnsmasq.leases /var/lib/misc")
             con.run("sudo systemctl restart dnsmasq.service")
