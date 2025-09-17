@@ -9,7 +9,7 @@ from labgrid.util.ssh import sshmanager
 from labgrid.step import step
 from labgrid.driver import Driver, TFTPProviderDriver
 
-from labgrid.protocol import ConsoleProtocol
+from labgrid.protocol import ConsoleProtocol, PowerProtocol, ButtonProtocol
 from labgrid.util import re_vt100
 
 @attr.s(eq=False)
@@ -51,6 +51,8 @@ class UBootInteraction(Driver):
     bindings = {
         "console": ConsoleProtocol,
         "provider": TFTPProviderDriver,
+        "power": PowerProtocol,
+        "reset": ButtonProtocol,
         }
     image = attr.ib(default="", validator=attr.validators.instance_of(str))
     sleep = attr.ib(default=0, validator=attr.validators.instance_of(int))
@@ -107,7 +109,8 @@ class UBootInteraction(Driver):
             if self._imagepath is not None:
                 command = re.sub("\$IMAGE", self._imagepath, command)
             self._run(command)
-        self.console.sendline(self.commands[-1])
+        if len(self.commands) > 0:
+            self.console.sendline(self.commands[-1])
 
     @step()
     def finish(self):
@@ -162,3 +165,27 @@ class UBootInteractionBootp(UBootInteraction):
             con.run(f"""grep -v {self.bootpip} /var/lib/misc/dnsmasq.leases > /tmp/dnsmasq.leases""")
             con.run("sudo mv /tmp/dnsmasq.leases /var/lib/misc")
             con.run("sudo systemctl restart dnsmasq.service")
+
+@target_factory.reg_driver
+@attr.s(eq=False)
+class MikrotikUBootInteractionBootp(UBootInteractionBootp):
+    mac = attr.ib(default="", validator=attr.validators.instance_of(str))
+    bootpip = attr.ib(default="", validator=attr.validators.instance_of(str))
+    cycle_power = attr.ib(default=False, validator=attr.validators.instance_of(bool))
+    hold_reset = attr.ib(default=False, validator=attr.validators.instance_of(bool))
+    hold_timeout = attr.ib(default=0, validator=attr.validators.instance_of(int))
+
+    def __attrs_post_init__(self):
+        super().__attrs_post_init__()
+
+    @step()
+    def prepare(self):
+        super().prepare() # set up tftp and dnsmasq
+
+        if self.mac != "" and self.bootpip != "":
+
+            self.reset.press()
+            self.power.cycle()
+            sleep(self.hold_timeout)
+            self.reset.release()
+
