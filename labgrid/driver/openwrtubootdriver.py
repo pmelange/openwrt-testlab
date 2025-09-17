@@ -106,7 +106,7 @@ class OpenWrtUBootDriver(UBootDriver):
                     self.console.sendline("")
                 if timeout.expired:
                     raise TIMEOUT(
-                            f"""COVR Timeout of {self.login_timeout} seconds exceeded during waiting for login"""
+                            f"""Timeout of {self.login_timeout} seconds exceeded during waiting for login"""
                             )
             last_before = before
 
