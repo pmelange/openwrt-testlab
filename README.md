@@ -4,8 +4,9 @@ The idea behind the openwrt-testlab is to provide a way to programtically test n
 
 Future plans include adding smartphones and other devices to test WiFi connectivity with the attached OpenWrt devices.
 
-![Testlab](https://github.com/user-attachments/assets/342c0612-ab7b-4b83-ad80-b10386c611cb)
-![patchpanel](https://github.com/user-attachments/assets/a955a3a7-a62a-4301-84dc-18d35c71b239)
+<img src="https://github.com/user-attachments/assets/1feafc32-8c37-40c1-9edd-7dd33aaff0ce" width="30%">
+<img src="https://github.com/user-attachments/assets/342c0612-ab7b-4b83-ad80-b10386c611cb" width="30%">
+<img src="https://github.com/user-attachments/assets/a955a3a7-a62a-4301-84dc-18d35c71b239" width="30%">
 
 ---
 
@@ -19,7 +20,7 @@ Each attached OpenWrt device has a network socket positioned next to it's power 
 
 ### Connecting a Device to the openwrt-testlab
 
-![testdev1](https://github.com/user-attachments/assets/495f7078-c43f-448b-be26-f172b0fad3ab)
+<img src="https://github.com/user-attachments/assets/495f7078-c43f-448b-be26-f172b0fad3ab" width="30%">
 
 For each attached OpenWrt device, there is a power socket, a network socket, a TTY serial interface terminal and a reset button terminal.  
 
