@@ -206,6 +206,7 @@ class OpenWrtStrategy(Strategy):
                 if not self._shellready:
                     self.transition(Status.shell)
                 else:
+                    self.target.activate(self.shell)
                     self.shell.run("reboot")
                     self.exporter_release_lease()
                     self.target.deactivate(self.shell)
@@ -215,6 +216,8 @@ class OpenWrtStrategy(Strategy):
                 # runs firstboot
                 if not self._shellready:
                     self.transition(Status.shell)
+                else:
+                    self.target.activate(self.shell)
                 self.shell.run("firstboot -y")
                 self._configured = False
                 self.transition(Status.reboot)
