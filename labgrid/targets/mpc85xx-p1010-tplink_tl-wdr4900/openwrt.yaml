@@ -67,7 +67,6 @@ targets:
           boot_expression: 'Autobooting in'
           boot_secret: 'lv'
           boot_secret_nolf: True
-          cycle_before_uboot: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
       - OpenWrtUciDriver:

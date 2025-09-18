@@ -52,6 +52,7 @@ targets:
           boot_secret_nolf: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
+          login_prompt: "entered forwarding state" # delay login because of kernel crash
       - OpenWrtUciDriver:
           config:
             - set:

@@ -48,7 +48,6 @@ targets:
           boot_expression: 'RESET button is pressed'
           boot_secret: '\x03'
           boot_secret_nolf: True
-          cycle_before_uboot: True
           hold_reset_before_uboot: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"

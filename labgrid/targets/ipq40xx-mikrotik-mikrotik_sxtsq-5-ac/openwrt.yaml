@@ -32,9 +32,11 @@ targets:
           bootpip: "192.168.0.104"
           cycle_power: True
           hold_reset: True
-          hold_timeout: 20
+          hold_timeout: 25
       - OpenWrtUBootDriver:
+          prompt: "IMPOSSIBLE" # we have a silent bootloader
           silent_uboot: True
+          hold_reset_before_uboot: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
           login_timeout: 240
