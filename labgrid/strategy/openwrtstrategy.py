@@ -71,7 +71,10 @@ class OpenWrtStrategy(Strategy):
                 self._shellready = True
                 self.status = Status.shell
             else:
-                raise StrategyError("Unable to determine state")
+                # unable to determine state.  Set to a know state of off.
+                self.power.off()
+                self._shellready = False
+                # raise StrategyError("Unable to determine state")
             if self._shellready:
                 # check to see if we are configured
                 self.console.sendline("")
@@ -88,7 +91,7 @@ class OpenWrtStrategy(Strategy):
                     self._configured = False
 
                 self.target.deactivate(self.uci)
-        else:
+        if not self.power.get():
             # power is off
             self.status = Status.off
             self._shellready = False
@@ -155,11 +158,9 @@ class OpenWrtStrategy(Strategy):
                 self.power.cycle()
 
             case Status.uboot_shell | Status.uboot_boot | Status.uboot_flash | Status.uboot_tftpboot | Status.uboot_bootp:
-                if not self.power.get() or not self._ubootready:
-                    self.transition(Status.on)
-                else:
-                    self.console.sendline("")
+
                 self.target.activate(self.uboot)
+
                 self._ubootready = True
                 self._shellready = False
                 self._configured = None
@@ -176,7 +177,7 @@ class OpenWrtStrategy(Strategy):
                     self._ubootready = False
 
             case Status.shell:
-                if not self.power.get():
+                if not self.power.get() or self._ubootready:
                     # reboot without uboot interaction
                     self.transition(Status.on)
                     self._shellready = False

@@ -98,6 +98,7 @@ class UBootInteraction(Driver):
 
     @step()
     def prepare(self):
+        # set up image for tftp server
         if self.image != "":
             self._imagepath = self.provider.stage(self.target.env.config.get_image_path(self.image))
         if self.sleep > 0:

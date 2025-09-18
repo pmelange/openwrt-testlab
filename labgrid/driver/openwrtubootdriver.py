@@ -65,7 +65,6 @@ class OpenWrtUBootDriver(UBootDriver):
     boot_secret_nolf = attr.ib(default=False, validator=attr.validators.instance_of(bool))
     login_timeout = attr.ib(default=60, validator=attr.validators.instance_of(int))
     silent_uboot = attr.ib(default=False, validator=attr.validators.instance_of(bool))
-    cycle_before_uboot = attr.ib(default=False, validator=attr.validators.instance_of(bool))
     hold_reset_before_uboot = attr.ib(default=False, validator=attr.validators.instance_of(bool))
 
     @step()
@@ -84,8 +83,7 @@ class OpenWrtUBootDriver(UBootDriver):
 
         if self.hold_reset_before_uboot:
             self.reset.press()
-        if self.cycle_before_uboot:
-            self.power.cycle()
+        self.power.cycle()
         while True and not self.silent_uboot:
             index, before, _, _ =  self.console.expect(expectations, timeout=self.login_timeout)
 
