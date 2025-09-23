@@ -31,10 +31,6 @@ class FreifunkWizardDriver(Driver):
     lon = attr.ib(validator=attr.validators.instance_of(str))
     bw_down = attr.ib(validator=attr.validators.instance_of(str))
     bw_up = attr.ib(validator=attr.validators.instance_of(str))
-    meship_radio0 = attr.ib(validator=attr.validators.instance_of(str))
-    meshmode_radio0 = attr.ib(validator=attr.validators.instance_of(str))
-    meship_radio1 = attr.ib(validator=attr.validators.instance_of(str))
-    meshmode_radio1 = attr.ib(validator=attr.validators.instance_of(str))
     dhcp = attr.ib(validator=attr.validators.instance_of(str))
 
     # default attributes
@@ -42,6 +38,11 @@ class FreifunkWizardDriver(Driver):
     alt = attr.ib(default="", validator=attr.validators.instance_of(str))
     sharedInternet = attr.ib(default=True, validator=attr.validators.instance_of(bool))
     stats = attr.ib(default=True, validator=attr.validators.instance_of(bool))
+    meship_radio0 = attr.ib(default="", validator=attr.validators.instance_of(str))
+    meshmode_radio0 = attr.ib(default="80211s", validator=attr.validators.instance_of(str))
+    meship_radio1 = attr.ib(default="", validator=attr.validators.instance_of(str))
+    meshmode_radio1 = attr.ib(default="80211s", validator=attr.validators.instance_of(str))
+ 
     ssid = attr.ib(default="berlin.freifunk.net", validator=attr.validators.instance_of(str))
 
     def __attrs_post_init__(self):

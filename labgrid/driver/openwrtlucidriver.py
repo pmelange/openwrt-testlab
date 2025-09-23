@@ -78,7 +78,10 @@ class OpenWrtLuCIDriver(Driver):
 
     @step(args=['form_element', 'optional', 'by'])
     def _get_element(self, form_element, optional, by=By.NAME):
-        return self._get_elements(form_element, optional, by)[0]
+        elements = self._get_elements(form_element, optional, by)
+        if not elements and optional:
+            return None
+        return elements[0]
 
     @step(args=['href', 'optional'])
     def _get_link(self, href, optional):
