@@ -74,7 +74,7 @@ class OpenWrtShellDriver(ShellDriver):
     await_login_timeout = attr.ib(default=30, validator=attr.validators.instance_of(int))
     post_login_settle_time = attr.ib(default=5, validator=attr.validators.instance_of(int))
     ubus_ready = attr.ib(default="network.interface.loopback", validator=attr.validators.instance_of(str))
-    ubus_ready_timeout = attr.ib(default=60.0, validator=attr.validators.instance_of(float))
+    ubus_ready_timeout = attr.ib(default=60, validator=attr.validators.instance_of(int))
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
@@ -100,7 +100,7 @@ class OpenWrtShellDriver(ShellDriver):
     @step()
     def _wait_ubus(self):
         """ Waits until the ubus object wait_ubus is available"""
-        timeout = Timeout(self.ubus_ready_timeout)
+        timeout = Timeout(float(self.ubus_ready_timeout))
         while not timeout.expired:
             _, _, exitcode = self._run(f"""ubus -t 10 wait_for {self.ubus_ready}""",
                                        timeout=timeout.remaining)
