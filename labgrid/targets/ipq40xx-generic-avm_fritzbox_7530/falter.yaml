@@ -7,7 +7,7 @@ targets:
       - olsr
     resources:
       - RemotePlace:
-          name: port5
+          name: port2
     drivers:
       - GpioDigitalOutputDriver:
           name: powerdriver
@@ -29,62 +29,62 @@ targets:
       - UBootInteractionBoot:
           commands:
             - boot
-      - UBootInteractionFlash:
-          image: "recovery"
-          commands:
-            - setenv ipaddr 192.168.0.105
-            - setenv serverip 192.168.0.1
-            - tftpboot $IMAGE
-            - nand erase 0x1c0000 0xec0000
-            - nand write 0x80010000 0x1c0000 0xec0000
-            - boot
       - UBootInteractionTftpboot:
           image: "initramfs"
+          sleep: 3
           commands:
-            - setenv ipaddr 192.168.0.105
+            - setenv ipaddr 192.168.0.102
             - setenv serverip 192.168.0.1
             - tftpboot $IMAGE
             - bootm
       - UBootInteractionBootp:
           image: "initramfs"
-          mac: "7e:87:3c:81:4f:61"
-          bootpip: "192.168.0.105"
+          sleep: 3
+          mac: "44:4e:6d:af:9c:57"
+          bootpip: "192.168.0.102"
           commands:
             - bootp
             - bootm
       - OpenWrtUBootDriver:
-          prompt: '=>'
+          prompt: '\(FRITZ7530\) #'
           boot_expression: 'stop autoboot'
           boot_secret: 'a'
           boot_secret_nolf: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
-          ubus_ready_timeout: 120
+          login_prompt: "entered forwarding state" # delay login because of kernel crash
       - OpenWrtUciDriver:
           config:
             - set:
                 network:
                   lan:
-                    ipaddr: '10.248.248.65'
+                    ipaddr: '10.248.248.17'
                     netmask: '255.255.255.240'
+                  wan:
+                    proto: 'dhcp'
+            - delete:
+                network:
+                  wan: 'username'
+                  wan: 'password'
+                  wan: 'ipv6'
             - del_list:
                 network:
                   "@device[0]":
-                    ports: 'ethernet'
-                  "@device[3]":
-                    ports: 'internet'
+                    ports: 'lan1'
+                  "@device[2]":
+                    ports: 'dsl0'
             - add_list:
                 network:
                   "@device[0]":
-                    ports: ['ethernet.105', 'internet']
-                  "@device[3]":
-                    ports: 'ethernet'
+                    ports: 'lan1.102'
+                  "@device[2]":
+                    ports: 'lan1'
       - OpenWrtLuCIDriver: {}
       - FreifunkWizardDriver:
-          address: "10.248.248.65"
+          address: "10.248.248.17"
           password: "abc123"
           network: "Freifunk Berlin"
-          hostname: "testdev05"
+          hostname: "testdev02"
           nickname: "testlabuser"
           realname: "openwrt-testlab"
           email: "email@address"
@@ -96,12 +96,12 @@ targets:
           bw_down: "60"
           bw_up: "20"
           stats: False
-          meship_radio0: "10.248.251.64"
+          meship_radio0: "10.248.251.16"
           meshmode_radio0: "80211s"
-          meship_radio1: "10.248.251.65"
+          meship_radio1: "10.248.251.17"
           meshmode_radio1: "80211s"
-          ssid: "testdev05.berlin.freifunk.net"
-          dhcp: "10.248.248.64/28"
+          ssid: "testdev02.berlin.freifunk.net"
+          dhcp: "10.248.248.16/28"
       - SSHDriver:
           explicit_scp_mode: True
       - NetworkInterfaceDriver: {}
@@ -110,10 +110,8 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX/" must be 128 char or less
-  factory: "firmware/freifunk-falter-1.4.0-ramips-mt7621-dlink_covr-x1860-a1-squashfs-factory.bin"
-  initramfs: "firmware/openwrt-24.10.0-ramips-mt7621-dlink_covr-x1860-a1-initramfs-kernel.bin"
-  recovery: "firmware/freifunk-falter-1.4.0-ramips-mt7621-dlink_covr-x1860-a1-squashfs-recovery.bin"
-  sysupgrade: "firmware/freifunk-falter-1.4.0-ramips-mt7621-dlink_covr-x1860-a1-squashfs-sysupgrade.bin"
+  initramfs: "firmware/openwrt-24.10.2-ipq40xx-generic-avm_fritzbox-7530-initramfs-uImage.itb"
+  sysupgrade: "firmware/freifunk-falter-1.4.0-ipq40xx-generic-avm_fritzbox-7530-squashfs-sysupgrade.bin"
   restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py
