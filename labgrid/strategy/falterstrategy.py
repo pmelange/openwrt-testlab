@@ -103,7 +103,7 @@ class FalterStrategy(Strategy):
                     self._ffwizard = False
 
                 self.target.deactivate(self.uci)
-            self.target.deactivate(self.console)
+            #self.target.deactivate(self.console)
         else:
             # power is off
             self.status = Status.off
