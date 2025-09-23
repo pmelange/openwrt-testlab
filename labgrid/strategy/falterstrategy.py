@@ -74,7 +74,9 @@ class FalterStrategy(Strategy):
                 self._shellready = True
                 self.status = Status.shell
             else:
-                raise StrategyError("Unable to determine state")
+                # unable to determine state. Set to a known state of off.
+                self.power.off()
+                self._shellready = False
             if self._shellready:
                 # check to see if we are configured
                 self.console.sendline("")
@@ -101,6 +103,7 @@ class FalterStrategy(Strategy):
                     self._ffwizard = False
 
                 self.target.deactivate(self.uci)
+            self.target.deactivate(self.console)
         else:
             # power is off
             self.status = Status.off
@@ -170,11 +173,8 @@ class FalterStrategy(Strategy):
                 self.power.cycle()
 
             case Status.uboot_shell | Status.uboot_boot | Status.uboot_flash | Status.uboot_tftpboot | Status.uboot_bootp:
-                if not self.power.get() or not self._ubootready:
-                    self.transition(Status.on)
-                else:
-                    self.console.sendline("")
                 self.target.activate(self.uboot)
+
                 self._ubootready = True
                 self._shellready = False
                 self._configured = None
@@ -192,7 +192,7 @@ class FalterStrategy(Strategy):
                     self._ubootready = False
 
             case Status.shell:
-                if not self.power.get():
+                if not self.power.get() or self._ubootready:
                     # reboot without uboot interaction
                     self.transition(Status.on)
                     self._shellready = False
@@ -225,11 +225,15 @@ class FalterStrategy(Strategy):
                     self.target.deactivate(self.ffwizard)
                     self._ffwizard = True
                     # Wait for "reboot: Restarting system" on console
-                    expectations = ["reboot: Restarting system", TIMEOUT]
+                    self.target.activate(self.console)
+                    expectations = ["reboot: Restarting system", 
+                                    "0.000000] Linux version",
+                                    TIMEOUT]
                     index, _, _, _ = self.console.expect(expectations, 
                                                          timeout=120)
-                    if index != 0:
+                    if index == 2:
                         raise StrategyError("Router not rebooting after wizard")
+                    self.target.deactivate(self.console)
                     # ffwizard is complete and reboots automatically
                     self.exporter_release_lease()
                     self.target.deactivate(self.shell)
@@ -243,6 +247,7 @@ class FalterStrategy(Strategy):
                     self.transition(Status.shell)
                 else:
                     self.shell.run("reboot")
+                    self._shellready = False
                     self.exporter_release_lease()
                     self.target.deactivate(self.shell)
                     self.target.activate(self.shell)
@@ -251,9 +256,11 @@ class FalterStrategy(Strategy):
                 # runs firstboot
                 if not self._shellready:
                     self.transition(Status.shell)
+                else:
+                    self.target.activate(self.shell)
                 self.shell.run("firstboot -y")
-                self._configured = False
-                self._ffwizard = False
+                self._configured = None
+                self._ffwizard = None
                 self.transition(Status.reboot)
 
             case Status.hardreset:
@@ -265,8 +272,8 @@ class FalterStrategy(Strategy):
                 self.target.deactivate(self.reset)
                 # Hard reset done, reboots automatically
                 self._shellready = False
-                self._configured = False
-                self._ffwizard = False
+                self._configured = None
+                self._ffwizard = None
                 self.target.deactivate(self.shell)
                 self.target.activate(self.shell)
 

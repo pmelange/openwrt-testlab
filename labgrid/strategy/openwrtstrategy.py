@@ -208,6 +208,7 @@ class OpenWrtStrategy(Strategy):
                 else:
                     self.target.activate(self.shell)
                     self.shell.run("reboot")
+                    self._shellready = False
                     self.exporter_release_lease()
                     self.target.deactivate(self.shell)
                     self.target.activate(self.shell)
@@ -219,7 +220,7 @@ class OpenWrtStrategy(Strategy):
                 else:
                     self.target.activate(self.shell)
                 self.shell.run("firstboot -y")
-                self._configured = False
+                self._configured = None
                 self.transition(Status.reboot)
 
             case Status.hardreset:
@@ -231,7 +232,7 @@ class OpenWrtStrategy(Strategy):
                 self.target.deactivate(self.reset)
                 # Hard reset done, reboots automatically
                 self._shellready = False
-                self._configured = False
+                self._configured = None
                 self.target.deactivate(self.shell)
                 self.target.activate(self.shell)
 
