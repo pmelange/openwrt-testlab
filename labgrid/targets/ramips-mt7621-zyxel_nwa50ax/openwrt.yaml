@@ -51,10 +51,6 @@ targets:
           keyfile: "~/.ssh/id_rsa.pub"
       - OpenWrtUciDriver:
           config:
-            - add:
-                network: "bridge-vlan" # create unamed section
-            - add:
-                network: "bridge-vlan"
             - set:
                 network:
                   interface: "wan" # create named section "wan"
@@ -66,29 +62,22 @@ targets:
                   "@system[0]":
                     hostname: "testdev08"
                 network:
-                  "@bridge-vlan[0]":
-                    device: "br-switch0"
-                    vlan: 1
-                  "@bridge-vlan[1]":
-                    device: "br-switch0"
-                    vlan: 108
                   wan:
-                    device: "br-switch0.1"
+                    device: "lan"
                     proto: "dhcp"
                   wan6:
-                    device: "br.switch0.1"
+                    device: "lan"
                     proto: "dhcp6"
-                  "@device[0]":
-                    name: "br-switch0"
                   lan:
-                    device: "br-switch0.108"
                     ipaddr: '192.168.108.1'
+            - del_list:
+                network:
+                  "@device[0]": 
+                    ports: "lan"
             - add_list:
                 network:
-                  "@bridge-vlan[0]":
-                    ports: "lan:u"
-                  "@bridge-vlan[1]":
-                    ports: "lan:t"
+                  "@device[0]": 
+                    ports: 'lan.108'
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True
@@ -98,9 +87,9 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
-  initramfs: "firmware/openwrt-24.10.0-ramips-mt7621-zyxel_nwa50ax-initramfs-kernel.bin"
-  recovery: "firmware/openwrt-24.10.0-ramips-mt7621-zyxel_nwa50ax-squashfs-sysupgrade.bin"
-  sysupgrade: "firmware/openwrt-24.10.0-ramips-mt7621-zyxel_nwa50ax-squashfs-sysupgrade.bin"
+  initramfs: "firmware/openwrt-24.10.3-ramips-mt7621-zyxel_nwa50ax-initramfs-kernel.bin"
+  factory: "firmware/openwrt-24.10.3-ramips-mt7621-zyxel_nwa50ax-squashfs-factory.bin"
+  sysupgrade: "firmware/openwrt-24.10.3-ramips-mt7621-zyxel_nwa50ax-squashfs-sysupgrade.bin"
   restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py
