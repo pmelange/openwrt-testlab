@@ -80,7 +80,7 @@ targets:
           bw_up: "20"
           stats: False
           meship_radio0: "10.248.251.0"
-          meshmode_radio0: "80211a"
+          meshmode_radio0: "80211s"
           meship_radio1: "10.248.251.1"
           meshmode_radio1: "80211s"
           ssid: "testdev01.berlin.freifunk.net"
