@@ -91,7 +91,7 @@ class OpenWrtStrategy(Strategy):
                     self._configured = False
 
                 self.target.deactivate(self.uci)
-            self.target.deactivate(self.console)
+            #self.target.deactivate(self.console)
         if not self.power.get():
             # power is off
             self.status = Status.off
