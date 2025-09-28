@@ -52,7 +52,6 @@ targets:
           boot_secret_nolf: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
-          login_prompt: "wan: Link is Up"
       - OpenWrtUciDriver:
           config:
             - set:

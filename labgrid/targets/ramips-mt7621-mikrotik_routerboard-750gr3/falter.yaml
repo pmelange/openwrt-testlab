@@ -39,7 +39,6 @@ targets:
           hold_reset_before_uboot: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
-          login_prompt: "wan: Link is Up"
       - OpenWrtUciDriver:
           config:
             - set:
