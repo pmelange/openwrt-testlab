@@ -123,13 +123,13 @@ class OpenWrtUciDriver(Driver):
     @Driver.check_active
     @step(args=['config', 'section', 'option', 'value'])
     def add_list(self, config: str, section: str, option: str, value: str):
-        cmd = f"""uci add_list {config}.{section}.{option}={value}"""
+        cmd = f"""uci add_list {config}.{section}.{option}="{value}" """
         self.shell.run(cmd)
 
     @Driver.check_active
     @step(args=['config', 'section', 'option', 'value'])
     def del_list(self, config: str, section: str, option: str, value: str):
-        cmd = f"""uci del_list {config}.{section}.{option}={value}"""
+        cmd = f"""uci del_list {config}.{section}.{option}="{value}" """
         self.shell.run(cmd)
  
     @Driver.check_active
@@ -145,7 +145,7 @@ class OpenWrtUciDriver(Driver):
             cmd = f"""uci set {config}.{value}={section}"""
         else:
             # set an option value
-            cmd = f"""uci set {config}.{section}.{option}={value}"""
+            cmd = f"""uci set {config}.{section}.{option}="{value}" """
         self.shell.run(cmd)
 
     @Driver.check_active
