@@ -1,0 +1,107 @@
+targets:
+  main:
+    features:
+      - console
+      - wifi
+      - online
+      - olsr
+    resources:
+      - RemotePlace:
+          name: port10
+    drivers:
+      - GpioDigitalOutputDriver:
+          name: powerdriver
+          bindings:
+            gpio: power # resouce name
+      - GpioDigitalOutputDriver:
+          name: resetdriver
+          bindings:
+            gpio: reset # resource name
+      - DigitalOutputPowerDriver:
+          bindings:
+            output: powerdriver
+      - DigitalOutputButtonDriver:
+          delay: 7.0
+          bindings:
+            output: resetdriver
+      - SerialDriver: {}
+      - TFTPProviderDriver: {}
+      - UBootInteractionBoot:
+          commands:
+            - boot
+      - UBootInteractionFlash:
+          image: "sysupgrade"
+          sleep: 3
+          commands:
+            - setenv ipaddr 192.168.0.110
+            - setenv serverip 192.168.0.1
+            - tftpboot 0x80060000 $IMAGE
+            - erase 0x9f020000 +7c0000
+            - cp.b 0x80060000 0x9f020000 0x7c0000
+            - reset
+      - OpenWrtUBootDriver:
+          prompt: 'db12x>'
+          boot_expression: 'Autobooting in'
+          boot_secret: 'tpl'
+          boot_secret_nolf: True
+      - OpenWrtShellDriver:
+          keyfile: "~/.ssh/id_rsa.pub"
+          ubus_ready_timeout: 120
+      - OpenWrtUciDriver:
+          config:
+            - set:
+                network:
+                  lan:
+                    ipaddr: '10.248.248.145'
+                    netmask: '255.255.255.240'
+                  "@switch_vlan[0]":
+                    vlan: 110
+                    ports: '1 2t 3 4 5 0t'
+                    vid: 110
+                  "@switch_vlan[1]":
+                    ports: '2 0t'
+            - del_list:
+                network:
+                  "@device[0]": 
+                    ports: 'eth0.1'
+            - add_list:
+                network:
+                  "@device[0]": 
+                    ports: 'eth0.110'
+      - OpenWrtLuCIDriver: {}
+      - FreifunkWizardDriver:
+          address: "10.248.248.145"
+          password: "abc123"
+          network: "Freifunk Berlin"
+          hostname: "testdev10"
+          nickname: "testlabuser"
+          realname: "openwrt-testlab"
+          email: "email@address"
+          location: "Panoramastrasse 1A, 10178 Berlin"
+          lat: "52.52081970085464"
+          lon: "13.409418231737128"
+          alt: "368"
+          sharedInternet: True
+          bw_down: "60"
+          bw_up: "20"
+          stats: False
+          meship_radio0: "10.248.251.144"
+          meshmode_radio0: "80211s"
+          meship_radio1: "10.248.251.145"
+          meshmode_radio1: "80211s"
+          ssid: "testdev10.berlin.freifunk.net"
+          dhcp: "10.248.248.144/28"
+      - SSHDriver:
+          explicit_scp_mode: True
+      - NetworkInterfaceDriver: {}
+      - FalterStrategy: {}
+paths:
+  backup: !template "$BASE/backup"
+images:
+  # filenames including a prefix of "/srv/tftp/testdevXX/" must be 128 char or less
+  sysupgrade: "firmware/freifunk-falter-1.4.0-ath79-generic-tplink_tl-wdr3600-v1-squashfs-sysupgrade.bin"
+  factory: "firmware/freifunk-falter-1.4.0-ath79-generic-tplink_tl-wdr3600-v1-squashfs-factory.bin"
+  restore: "backup/restore.tar.gz"
+imports:
+  - ../../openwrt-testlab.py
+  - ../../falter-testlab.py

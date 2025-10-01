@@ -1,0 +1,86 @@
+targets:
+  main:
+    features:
+      - console
+      - wifi
+      - online
+      - olsr
+    resources:
+      - RemotePlace:
+          name: port10
+    drivers:
+      - GpioDigitalOutputDriver:
+          name: powerdriver
+          bindings:
+            gpio: power # resouce name
+      - GpioDigitalOutputDriver:
+          name: resetdriver
+          bindings:
+            gpio: reset # resource name
+      - DigitalOutputPowerDriver:
+          bindings:
+            output: powerdriver
+      - DigitalOutputButtonDriver:
+          delay: 7.0
+          bindings:
+            output: resetdriver
+      - SerialDriver: {}
+      - TFTPProviderDriver: {}
+      - UBootInteractionBoot:
+          commands:
+            - boot
+      - UBootInteractionFlash:
+          image: "sysupgrade"
+          sleep: 3
+          commands:
+            - setenv ipaddr 192.168.0.110
+            - setenv serverip 192.168.0.1
+            - tftpboot 0x80060000 $IMAGE
+            - erase 0x9f020000 +7c0000
+            - cp.b 0x80060000 0x9f020000 0x7c0000
+            - reset
+      - OpenWrtUBootDriver:
+          prompt: 'db12x>'
+          boot_expression: 'Autobooting in'
+          boot_secret: 'tpl'
+          boot_secret_nolf: True
+      - OpenWrtShellDriver:
+          keyfile: "~/.ssh/id_rsa.pub"
+          ubus_ready_timeout: 120
+      - OpenWrtUciDriver:
+          config:
+            - set:
+                system:
+                  "@system[0]":
+                    hostname: "testdev10"
+                network:
+                  lan:
+                    ipaddr: '192.168.110.1'
+                  "@switch_vlan[0]":
+                    vlan: 110
+                    ports: '1 2t 3 4 5 0t'
+                    vid: 110
+                  "@switch_vlan[1]":
+                    ports: '2 0t'
+            - del_list:
+                network:
+                  "@device[0]": 
+                    ports: 'eth0.1'
+            - add_list:
+                network:
+                  "@device[0]": 
+                    ports: 'eth0.110'
+      - OpenWrtLuCIDriver: {}
+      - SSHDriver:
+          explicit_scp_mode: True
+      - NetworkInterfaceDriver: {}
+      - OpenWrtStrategy: {}
+paths:
+  backup: !template "$BASE/backup"
+images:
+  # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
+  factory: "firmware/openwrt-24.10.3-ath79-generic-tplink_tl-wdr3600-v1-squashfs-factory.bin"
+  sysupgrade: "firmware/openwrt-24.10.3-ath79-generic-tplink_tl-wdr3600-v1-squashfs-sysupgrade.bin"
+  restore: "backup/restore.tar.gz"
+imports:
+  - ../../openwrt-testlab.py
