@@ -1,10 +1,16 @@
 targets:
   main:
     features:
+      - uboot_ramboot
+      - dsl_modem
       - console
       - wifi
       - online
-      - olsr
+    options:
+      hostname: 'testdev02'
+      lan_ip: '192.168.102.1'
+      lan_vlan: 102
+      connected_port: 'lan1'
     resources:
       - RemotePlace:
           name: port2
@@ -55,25 +61,9 @@ targets:
       - OpenWrtUciDriver:
           config:
             - set:
-                system:
-                  "@system[0]":
-                    hostname: "testdev02"
                 network:
-                  lan:
-                    ipaddr: '192.168.102.1'
                   wan:
-                    proto: "dhcp"
-                    device: "lan1"
-                  wan6:
-                    device: "lan1"
-            - del_list:
-                network:
-                  "@device[0]":
-                    ports: 'lan1'
-            - add_list:
-                network:
-                  "@device[0]":
-                    ports: 'lan1.102'
+                    proto: "dhcp" # because of DSL modem
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True

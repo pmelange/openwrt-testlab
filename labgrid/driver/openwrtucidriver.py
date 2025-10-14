@@ -141,7 +141,7 @@ class OpenWrtUciDriver(Driver):
     @step(args=['config', 'section', 'option', 'value'])
     def set(self, config: str, section: str, option: str|None, value:str):
         if option is None:
-            # create a new names section, therefore the strange order
+            # create a new named section, therefore the strange order
             cmd = f"""uci set {config}.{value}={section}"""
         else:
             # set an option value
@@ -176,9 +176,153 @@ class OpenWrtUciDriver(Driver):
         sleep(0.5) # let the system reconfigure before going furthen
         return (data, [], errorcode)
 
+    def _find_device(self, device):
+        if device.startswith('br-'):
+            idx = 0
+            result = [0, 0, 0]
+            while result[2] == 0:
+                result = self.get('network', 
+                                  f"""@device[{idx}]""", 
+                                  'name')
+                if result[2] == 0 and result[0][0] == device:
+                    return f"""@device[{idx}]"""
+                idx += 1
+            return None
+        return None
+
+    def _find_switch_vlan(self, vlan):
+        idx = 0
+        result = [0, 0, 0]
+        while result[2] == 0:
+            result = self.get('network',
+                              f"""@switch_vlan[{idx}]""",
+                              'vlan')
+            if result[2] == 0 and result[0][0] == vlan:
+                return f"""@switch_vlan[{idx}]"""
+            idx += 1
+        return None
+
+    def _configure_options(self):
+        # configure based on target's options
+        # hostname
+        oldhostname, _, _ = self.get('system', '@system[0]', 'hostname')
+        result = self.target.env.config.get_target_option(self.target.name,
+                                                          'hostname',
+                                                          oldhostname[0])
+        self.set('system', '@system[0]', 'hostname', result)
+        # network
+        lan_dev = self.get('network', 'lan', 'device')
+        lan_device = lan_dev[0][0]
+        wan_dev = self.get('network', 'wan', 'device')
+        wan_device = wan_dev[0][0]
+        connected_port = self.target.env.config.get_target_option(self.target.name,
+                                                                  'connected_port')
+        lan_vlan = self.target.env.config.get_target_option(self.target.name,
+                                                            'lan_vlan')
+        lan_ip = self.target.env.config.get_target_option(self.target.name,
+                                                          'lan_ip')
+        lan_netmask = self.target.env.config.get_target_option(self.target.name,
+                                                               'lan_netmask',
+                                                               '255.255.255.0')
+        # set LAN IP address
+        self.set('network', 'lan', 'ipaddr', lan_ip)
+        self.set('network', 'lan', 'netmask', lan_netmask)
+
+        # assume DSA switch unless feature 'swconfig' is set
+        if 'swconfig' not in self.target.env.get_target_features():
+            # DSA switch
+            if lan_dev[2] == 0:
+                lan_dev_section = self._find_device(lan_device)
+                self.del_list('network', lan_dev_section, 'ports', connected_port)
+                self.add_list('network', lan_dev_section, 'ports', 
+                              connected_port + '.' + str(lan_vlan))
+                if wan_dev[2] == 0:
+                    wan_dev_section = self._find_device(wan_device)
+                    if wan_dev_section is None:
+                        self.add_list('network', lan_dev_section, 'ports', 
+                                      wan_device)
+                        self.set('network', 'wan', 'device', connected_port)
+                        self.set('network', 'wan6', 'device', connected_port)
+                    else:
+                        # TODO There is a WAN device section, manipulate
+                        pass
+                else:
+                    # create WAN
+                    self.set('network', 'interface', None, 'wan')
+                    self.set('network', 'wan', 'proto', 'dhcp')
+                    self.set('network', 'wan', 'device', connected_port)
+                    self.set('network', 'interface', None, 'wan6')
+                    self.set('network', 'wan6', 'proto', 'dhcpv6')
+                    self.set('network', 'wan6', 'device', connected_port)
+
+            else:
+                # TODO There is no LAN interface.  WTF
+                pass
+        else:
+            # swconfig switch
+            ports = self.target.env.config.get_target_option(self.target.name,
+                                                             'ports')
+            cpuport = self.target.env.config.get_target_option(self.target.name,
+                                                               'cpuport')
+            switch_device = self.get('network', '@switch[0]', 'name')[0][0]
+            # LAN
+            if lan_dev[2] == 0:
+                lan_dev_section = self._find_device(lan_device)
+                # update device section to new vlan
+                lan_ports = self.get('network', lan_dev_section, 'ports')[0][0]
+                old_vlan = lan_ports[-1]
+                self.del_list('network', lan_dev_section, 'ports', lan_ports)
+                self.add_list('network', lan_dev_section, 'ports', 
+                              lan_ports[:-1] + str(lan_vlan))
+                # update switch_vlan section to new vlan and port config
+                switch_vlan_section = self._find_switch_vlan(old_vlan)
+                self.set('network', switch_vlan_section, 'vlan', lan_vlan)
+                self.set('network', switch_vlan_section, 'vid', lan_vlan)
+                portlist = ""
+                for port in ports.split(' '):
+                    portlist += port
+                    if port == str(cpuport) or port == str(connected_port):
+                        portlist += 't'
+                    portlist += ' '
+                portlist = portlist[:-1]
+                self.set('network', switch_vlan_section, 'ports', portlist)
+            else:
+                # TODO There is no LAN interface, WTF
+                pass
+            
+            # WAN
+            if wan_dev[2] == 0:
+                # WAN exists
+                wan_dev_section = self._find_device(wan_device)
+                if wan_dev_section is not None:
+                    wan_device = set.get('network', wan_dev_section, 'ports')[0][0]
+                switch_vlan_section = self._find_switch_vlan(wan_device[-1])
+                
+            else:
+                # create WAN since it doesn't exist
+                wan_device = lan_ports[:-1] + str(int(lan_ports[-1])+1)
+                self.set('network', 'interface', None, 'wan')
+                self.set('network', 'wan', 'proto', 'dhcp')
+                self.set('network', 'wan', 'device', wan_device)
+                self.set('network', 'interface', None, 'wan6')
+                self.set('network', 'wan6', 'proto', 'dhcpv6')
+                self.set('network', 'wan6', 'device', wan_device)
+                # create the switch_vlan section
+                switch_vlan_section = 'wan_vlan'
+                self.set('network', 'switch_vlan', None, switch_vlan_section)
+                self.set('network', switch_vlan_section, 'device', switch_device)
+                self.set('network', switch_vlan_section, 'vlan', wan_device[-1])
+            
+            self.set('network', switch_vlan_section, 'ports', 
+                     f"""{cpuport}t {connected_port}""")
+
     @Driver.check_active
     @step()
     def configure(self):
+        # configure based on the target's environment options
+        self._configure_options()
+
+        # configure based on the config attribute
         if not isinstance(self.config, list):
             raise ValueError("The config must be a list of dictionaries:{self.config}")
         for actions in self.config:
