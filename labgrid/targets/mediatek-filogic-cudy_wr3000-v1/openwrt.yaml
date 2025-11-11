@@ -5,6 +5,12 @@ targets:
       - wifi
       - online
       - olsr
+    options:
+      hostname: 'testdev01'
+      lan_ip: '192.168.101.1'
+      lan_netmask: '255.255.255.0'
+      lan_vlan: 101
+      connected_port: wan
     resources:
       - RemotePlace:
           name: port1
@@ -51,19 +57,7 @@ targets:
           hold_reset_before_uboot: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
-      - OpenWrtUciDriver:
-          config:
-            - set:
-                system:
-                  "@system[0]":
-                    hostname: "testdev01"
-                network:
-                  lan:
-                    ipaddr: '192.168.101.1'
-            - add_list:
-                network:
-                  "@device[0]":
-                    ports: 'wan.101'
+      - OpenWrtUciDriver: {}
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True

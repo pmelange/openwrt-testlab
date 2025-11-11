@@ -66,28 +66,6 @@ targets:
           keyfile: "~/.ssh/id_rsa.pub"
           ubus_ready_timeout: 120
       - OpenWrtUciDriver: {}
-        #          config:
-        #            - set:
-        #                system:
-        #                  "@system[0]":
-        #                    hostname: "testdev10"
-        #                network:
-        #                  lan:
-        #                    ipaddr: '192.168.110.1'
-        #                  "@switch_vlan[0]":
-        #                    vlan: 110
-        #                    ports: '1 2t 3 4 5 0t'
-        #                    vid: 110
-        #                  "@switch_vlan[1]":
-        #                    ports: '2 0t'
-        #            - del_list:
-        #                network:
-        #                  "@device[0]": 
-        #                    ports: 'eth0.1'
-        #            - add_list:
-        #                network:
-        #                  "@device[0]": 
-        #                    ports: 'eth0.110'
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True

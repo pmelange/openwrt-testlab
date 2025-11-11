@@ -5,6 +5,12 @@ targets:
       - wifi
       - online
       - olsr
+    options:
+      hostname: 'testdev04'
+      lan_ip: '192.168.104.1'
+      lan_netmask: '255.255.255.0'
+      lan_vlan: 104
+      connected_port: lan
     resources:
       - RemotePlace:
           name: port4
@@ -40,35 +46,35 @@ targets:
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
           login_timeout: 240
-      - OpenWrtUciDriver:
-          config:
-            - set:
-                network:
-                  interface: "wan"
-            - set:
-                network:
-                  interface: "wan6"
-            - set:
-                system:
-                  "@system[0]":
-                    hostname: "testdev04"
-                network:
-                  lan:
-                    ipaddr: '192.168.104.1'
-                  wan:
-                    proto: "dhcp"
-                    device: "lan"
-                  wan6:
-                    proto: "dhcpv6"
-                    device: "lan"
-            - del_list:
-                network:
-                  "@device[0]":
-                    ports: 'lan'
-            - add_list:
-                network:
-                  "@device[0]":
-                    ports: 'lan.104'
+      - OpenWrtUciDriver: {}
+          #config:
+          #  - set:
+          #      network:
+          #        interface: "wan"
+          #  - set:
+          #      network:
+          #        interface: "wan6"
+          #  - set:
+          #      system:
+          #        "@system[0]":
+          #          hostname: "testdev04"
+          #      network:
+          #        lan:
+          #          ipaddr: '192.168.104.1'
+          #        wan:
+          #          proto: "dhcp"
+          #          device: "lan"
+          #        wan6:
+          #          proto: "dhcpv6"
+          #          device: "lan"
+          #  - del_list:
+          #      network:
+          #        "@device[0]":
+          #          ports: 'lan'
+          #  - add_list:
+          #      network:
+          #        "@device[0]":
+          #          ports: 'lan.104'
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True

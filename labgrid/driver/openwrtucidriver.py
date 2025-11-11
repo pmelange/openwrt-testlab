@@ -214,6 +214,7 @@ class OpenWrtUciDriver(Driver):
         lan_dev = self.get('network', 'lan', 'device')
         lan_device = lan_dev[0][0]
         wan_dev = self.get('network', 'wan', 'device')
+
         wan_device = wan_dev[0][0]
         connected_port = self.target.env.config.get_target_option(self.target.name,
                                                                   'connected_port')
@@ -239,8 +240,9 @@ class OpenWrtUciDriver(Driver):
                 if wan_dev[2] == 0:
                     wan_dev_section = self._find_device(wan_device)
                     if wan_dev_section is None:
-                        self.add_list('network', lan_dev_section, 'ports', 
-                                      wan_device)
+                        if wan_device != connected_port:
+                            self.add_list('network', lan_dev_section, 'ports', 
+                                          wan_device)
                         self.set('network', 'wan', 'device', connected_port)
                         self.set('network', 'wan6', 'device', connected_port)
                     else:
