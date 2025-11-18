@@ -214,8 +214,8 @@ class OpenWrtUciDriver(Driver):
         lan_dev = self.get('network', 'lan', 'device')
         lan_device = lan_dev[0][0]
         wan_dev = self.get('network', 'wan', 'device')
-
         wan_device = wan_dev[0][0]
+
         connected_port = self.target.env.config.get_target_option(self.target.name,
                                                                   'connected_port')
         lan_vlan = self.target.env.config.get_target_option(self.target.name,
@@ -246,8 +246,15 @@ class OpenWrtUciDriver(Driver):
                         self.set('network', 'wan', 'device', connected_port)
                         self.set('network', 'wan6', 'device', connected_port)
                     else:
-                        # TODO There is a WAN device section, manipulate
-                        pass
+                        # There is a WAN device section, remove all ports and
+                        # add the connected_port
+                        ports = self.get('network', wan_dev_section, 'ports')
+                        for port in ports[0][0].split():
+                            if port != connected_port:
+                                # add to lan bridge device
+                                self.add_list('network', lan_dev_section, 'ports', port)
+                            self.del_list('network' , wan_dev_section, 'ports', port)
+                        self.add_list('network', wan_dev_section, 'ports', connected_port)
                 else:
                     # create WAN
                     self.set('network', 'interface', None, 'wan')
