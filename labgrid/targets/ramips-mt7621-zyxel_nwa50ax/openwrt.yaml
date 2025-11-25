@@ -5,6 +5,12 @@ targets:
       - wifi
       - online
       - olsr
+    options:
+      hostname: 'testdev08'
+      lan_ip: '192.168.108.1'
+      lan_netmask: '255.255.255.0'
+      lan_vlan: 108
+      connected_port: 'lan'
     resources:
       - RemotePlace:
           name: port8
@@ -49,35 +55,7 @@ targets:
           boot_secret_nolf: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
-      - OpenWrtUciDriver:
-          config:
-            - set:
-                network:
-                  interface: "wan" # create named section "wan"
-            - set:
-                network:
-                  interface: "wan6" # create named section "wan6"
-            - set:
-                system:
-                  "@system[0]":
-                    hostname: "testdev08"
-                network:
-                  wan:
-                    device: "lan"
-                    proto: "dhcp"
-                  wan6:
-                    device: "lan"
-                    proto: "dhcp6"
-                  lan:
-                    ipaddr: '192.168.108.1'
-            - del_list:
-                network:
-                  "@device[0]": 
-                    ports: "lan"
-            - add_list:
-                network:
-                  "@device[0]": 
-                    ports: 'lan.108'
+      - OpenWrtUciDriver: {}
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True
