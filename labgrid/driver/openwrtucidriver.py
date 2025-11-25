@@ -305,7 +305,7 @@ class OpenWrtUciDriver(Driver):
                 # WAN exists
                 wan_dev_section = self._find_device(wan_device)
                 if wan_dev_section is not None:
-                    wan_device = set.get('network', wan_dev_section, 'ports')[0][0]
+                    wan_device = self.get('network', wan_dev_section, 'ports')[0][0]
                 switch_vlan_section = self._find_switch_vlan(wan_device[-1])
                 
             else:
