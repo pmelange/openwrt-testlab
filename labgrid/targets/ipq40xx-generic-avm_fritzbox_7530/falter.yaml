@@ -5,6 +5,11 @@ targets:
       - wifi
       - online
       - olsr
+    options:
+      lan_ip: '10.248.248.17'
+      lan_netmask: '255.255.255.240'
+      lan_vlan: 102
+      connected_port: 'lan1'
     resources:
       - RemotePlace:
           name: port2
@@ -56,28 +61,8 @@ targets:
           config:
             - set:
                 network:
-                  lan:
-                    ipaddr: '10.248.248.17'
-                    netmask: '255.255.255.240'
                   wan:
-                    proto: 'dhcp'
-            - delete:
-                network:
-                  wan: 'username'
-                  wan: 'password'
-                  wan: 'ipv6'
-            - del_list:
-                network:
-                  "@device[0]":
-                    ports: 'lan1'
-                  "@device[2]":
-                    ports: 'dsl0'
-            - add_list:
-                network:
-                  "@device[0]":
-                    ports: 'lan1.102'
-                  "@device[2]":
-                    ports: 'lan1'
+                    proto: 'dhcp' # because of DSL modem
       - OpenWrtLuCIDriver: {}
       - FreifunkWizardDriver:
           address: "10.248.248.17"

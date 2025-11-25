@@ -1,10 +1,18 @@
 targets:
   main:
     features:
+      - swconfig
       - console
       - wifi
       - online
       - olsr
+    options:
+      lan_ip: '10.248.248.145'
+      lan_netmask: '255.255.255.240'
+      lan_vlan: 110
+      ports: '0 1 2 3 4 5'
+      connected_port: '2'
+      cpuport: '0'
     resources:
       - RemotePlace:
           name: port10
@@ -47,27 +55,7 @@ targets:
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
           ubus_ready_timeout: 120
-      - OpenWrtUciDriver:
-          config:
-            - set:
-                network:
-                  lan:
-                    ipaddr: '10.248.248.145'
-                    netmask: '255.255.255.240'
-                  "@switch_vlan[0]":
-                    vlan: 110
-                    ports: '1 2t 3 4 5 0t'
-                    vid: 110
-                  "@switch_vlan[1]":
-                    ports: '2 0t'
-            - del_list:
-                network:
-                  "@device[0]": 
-                    ports: 'eth0.1'
-            - add_list:
-                network:
-                  "@device[0]": 
-                    ports: 'eth0.110'
+      - OpenWrtUciDriver: {}
       - OpenWrtLuCIDriver: {}
       - FreifunkWizardDriver:
           address: "10.248.248.145"

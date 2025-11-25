@@ -5,6 +5,11 @@ targets:
       - wifi
       - online
       - olsr
+    options:
+      lan_ip: '10.248.248.1'
+      lan_netmask: '255.255.255.240'
+      lan_vlan: 101
+      connected_port: 'wan'
     resources:
       - RemotePlace:
           name: port1
@@ -51,17 +56,7 @@ targets:
           hold_reset_before_uboot: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
-      - OpenWrtUciDriver:
-          config:
-            - set:
-                network:
-                  lan:
-                    ipaddr: '10.248.248.1'
-                    netmask: '255.255.255.240'
-            - add_list:
-                network:
-                  "@device[0]":
-                    ports: 'wan.101'
+      - OpenWrtUciDriver: {}
       - OpenWrtLuCIDriver: {}
       - FreifunkWizardDriver:
           address: "10.248.248.1"
