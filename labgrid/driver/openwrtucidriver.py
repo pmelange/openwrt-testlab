@@ -249,11 +249,12 @@ class OpenWrtUciDriver(Driver):
                         # There is a WAN device section, remove all ports and
                         # add the connected_port
                         ports = self.get('network', wan_dev_section, 'ports')
-                        for port in ports[0][0].split():
-                            if port != connected_port:
-                                # add to lan bridge device
-                                self.add_list('network', lan_dev_section, 'ports', port)
-                            self.del_list('network' , wan_dev_section, 'ports', port)
+                        if ports[2] == 0:
+                            for port in ports[0][0].split():
+                                if port != connected_port:
+                                    # add to lan bridge device
+                                    self.add_list('network', lan_dev_section, 'ports', port)
+                                self.del_list('network' , wan_dev_section, 'ports', port)
                         self.add_list('network', wan_dev_section, 'ports', connected_port)
                 else:
                     # create WAN
