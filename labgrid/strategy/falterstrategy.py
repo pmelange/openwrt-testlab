@@ -88,7 +88,10 @@ class FalterStrategy(Strategy):
                     self.status = Status.config
                     self._configured = True
                     # We are at least configured, set up the networking
-                    self.exporter_renew_lease()
+                    try:
+                        self.exporter_renew_lease()
+                    except SystemError:
+                        pass
                 else:
                     self._configured = False
 
