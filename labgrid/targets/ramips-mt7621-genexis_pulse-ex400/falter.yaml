@@ -1,6 +1,7 @@
 targets:
   main:
     features:
+      - ramboot_then_flash
       - console
       - wifi
       - online
@@ -34,16 +35,8 @@ targets:
       - UBootInteractionBoot:
           commands:
             - boot
-      - UBootInteractionTftpboot:
-          image: "initramfs"
-          commands:
-            - net_init
-            - setenv ipaddr 192.168.0.6
-            - setenv serverip 192.168.0.1
-            - tftpboot $IMAGE
-            - bootm
-      - UBootInteractionBootp:
-          image: "initramfs"
+      - UBootInteractionRamboot:
+          image: "rescue_ramboot"
           mac: "44:d4:37:8c:13:78"
           bootpip: "192.168.0.6"
           commands:
@@ -89,6 +82,8 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
+  target: !template $LG_IMAGE
+  rescue_ramboot: "firmware/openwrt-24.10.3-ramips-mt7621-genexis_pulse-ex400-initramfs-kernel.bin"
   factory: "firmware/freifunk-falter-1.5.0-snapshot-ramips-mt7621-genexis_pulse-ex400-factory.bin"
   sysupgrade: "firmware/freifunk-falter-1.5.0-snapshot-ramips-mt7621-genexis_pulse-ex400-sysupgrade.bin"
   restore: "backup/restore.tar.gz"

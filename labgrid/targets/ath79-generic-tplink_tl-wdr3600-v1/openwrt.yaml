@@ -1,16 +1,16 @@
 targets:
   main:
     features:
-      - uboot_flash
       - uboot_ramboot
+      - uboot_flash
       - swconfig
       - console
       - wifi
       - online
     options:
       hostname: 'testdev10'
-      lan_ip: '192.168.110.1'
-      lan_netmask: '255.255.255.0'
+      lan_ip: '10.248.248.145'
+      lan_netmask: '255.255.255.240'
       lan_vlan: 110
       ports: '0 1 2 3 4 5'
       connected_port: 2
@@ -40,7 +40,7 @@ targets:
           commands:
             - boot
       - UBootInteractionFlash:
-          image: "sysupgrade"
+          image: "target"
           sleep: 3
           commands:
             - setenv ipaddr 192.168.0.110
@@ -49,8 +49,8 @@ targets:
             - erase 0x9f020000 +7c0000
             - cp.b 0x80060000 0x9f020000 0x7c0000
             - reset
-      - UBootInteractionTftpboot:
-          image: 'initramfs'
+      - UBootInteractionRamboot:
+          image: 'target'
           sleep: 3
           commands:
             - setenv ipaddr 192.168.0.110
@@ -64,7 +64,6 @@ targets:
           boot_secret_nolf: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
-          ubus_ready_timeout: 120
       - OpenWrtUciDriver: {}
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
@@ -75,6 +74,7 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
+  target: !template $LG_IMAGE
   initramfs: "firmware/openwrt-24.10.3-ath79-generic-tplink_tl-wdr3600-v1-initramfs-kernel.bin"
   factory: "firmware/openwrt-24.10.3-ath79-generic-tplink_tl-wdr3600-v1-squashfs-factory.bin"
   sysupgrade: "firmware/openwrt-24.10.3-ath79-generic-tplink_tl-wdr3600-v1-squashfs-sysupgrade.bin"

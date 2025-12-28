@@ -1,6 +1,7 @@
 targets:
   main:
     features:
+      - ramboot_then_flash
       - console
       - wifi
       - online
@@ -31,8 +32,8 @@ targets:
             output: resetdriver
       - SerialDriver: {}
       - TFTPProviderDriver: {}
-      - MikrotikUBootInteractionBootp:
-          image: "initramfs"
+      - MikrotikUBootInteractionRamboot:
+          image: "rescue_ramboot"
           mac: "dc:2c:6e:c3:fa:b9"
           bootpip: "192.168.0.104"
           cycle_power: True
@@ -78,7 +79,8 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX/" must be 128 char or less
-  sysupgrade: "firmware/freifunk-falter-1.4.0-ipq40xx-mikrotik-mikrotik_sxtsq-5-ac-squashfs-sysupgrade.bin"
+  target: !template $LG_IMAGE
+  rescue_ramboot: "firmware/openwrt-24.10.2-ipq40xx-generic-avm_fritzbox-7530-initramfs-uImage.itb"
   restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py

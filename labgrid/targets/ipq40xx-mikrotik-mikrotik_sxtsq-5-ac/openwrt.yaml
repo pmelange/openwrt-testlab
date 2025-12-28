@@ -1,14 +1,16 @@
 targets:
   main:
     features:
+      - ramboot_then_flash
+      - uboot_ramboot
       - console
       - wifi
       - online
       - olsr
     options:
       hostname: 'testdev04'
-      lan_ip: '192.168.104.1'
-      lan_netmask: '255.255.255.0'
+      lan_ip: '10.248.248.49'
+      lan_netmask: '255.255.255.240'
       lan_vlan: 104
       connected_port: lan
     resources:
@@ -32,8 +34,8 @@ targets:
             output: resetdriver
       - SerialDriver: {}
       - TFTPProviderDriver: {}
-      - MikrotikUBootInteractionBootp:
-          image: "initramfs"
+      - MikrotikUBootInteractionRamboot:
+          image: "rescue_ramboot"
           mac: "dc:2c:6e:c3:fa:b9"
           bootpip: "192.168.0.104"
           cycle_power: True
@@ -56,7 +58,8 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
-  initramfs: "firmware/openwrt-24.10.2-ipq40xx-mikrotik-mikrotik_sxtsq-5-ac-initramfs-kernel.bin"
+  target: !template $LG_IMAGE
+  rescue_ramboot: "firmware/openwrt-24.10.2-ipq40xx-mikrotik-mikrotik_sxtsq-5-ac-initramfs-kernel.bin"
   sysupgrade: "firmware/openwrt-24.10.2-ipq40xx-mikrotik-mikrotik_sxtsq-5-ac-squashfs-sysupgrade.bin"
   restore: "backup/restore.tar.gz"
 imports:

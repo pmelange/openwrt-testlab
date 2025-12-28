@@ -1,6 +1,7 @@
 targets:
   main:
     features:
+      - ramboot_then_flash
       - console
       - wifi
       - online
@@ -34,16 +35,8 @@ targets:
       - UBootInteractionBoot:
           commands:
             - boot
-      - UBootInteractionTftpboot:
-          image: "initramfs"
-          sleep: 3
-          commands:
-            - setenv ipaddr 192.168.0.102
-            - setenv serverip 192.168.0.1
-            - tftpboot $IMAGE
-            - bootm
-      - UBootInteractionBootp:
-          image: "initramfs"
+      - UBootInteractionRamboot:
+          image: "rescue_ramboot"
           sleep: 3
           mac: "44:4e:6d:af:9c:57"
           bootpip: "192.168.0.102"
@@ -94,7 +87,8 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX/" must be 128 char or less
-  initramfs: "firmware/openwrt-24.10.2-ipq40xx-generic-avm_fritzbox-7530-initramfs-uImage.itb"
+  target: !template $LG_IMAGE
+  rescue_ramboot: "firmware/openwrt-24.10.2-ipq40xx-generic-avm_fritzbox-7530-initramfs-uImage.itb"
   sysupgrade: "firmware/freifunk-falter-1.4.0-ipq40xx-generic-avm_fritzbox-7530-squashfs-sysupgrade.bin"
   restore: "backup/restore.tar.gz"
 imports:

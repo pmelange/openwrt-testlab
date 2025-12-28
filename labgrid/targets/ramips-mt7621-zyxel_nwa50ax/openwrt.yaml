@@ -1,14 +1,15 @@
 targets:
   main:
     features:
+      - ramboot_then_rescue
       - console
       - wifi
       - online
       - olsr
     options:
       hostname: 'testdev08'
-      lan_ip: '192.168.108.1'
-      lan_netmask: '255.255.255.0'
+      lan_ip: '10.248.248.113'
+      lan_netmask: '255.255.255.240'
       lan_vlan: 108
       connected_port: 'lan'
     resources:
@@ -35,15 +36,8 @@ targets:
       - UBootInteractionBoot:
           commands:
             - atgo
-      - UBootInteractionTftpboot:
-          image: "initramfs"
-          commands:
-            - atnf $IMAGE
-            - atna 192.168.0.108
-            - atns "192.168.0.1; tftpboot"
-            - atns "192.168.0.1; bootm"
-      - UBootInteractionBootp:
-          image: "initramfs"
+      - UBootInteractionRamboot:
+          image: "rescue_ramboot"
           mac: "fa:26:d7:78:e2:6c"
           bootpip: "192.168.0.108"
           commands:
@@ -65,7 +59,8 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
-  initramfs: "firmware/openwrt-24.10.3-ramips-mt7621-zyxel_nwa50ax-initramfs-kernel.bin"
+  target: !template $LG_IMAGE
+  rescue_ramboot: "firmware/openwrt-24.10.3-ramips-mt7621-zyxel_nwa50ax-initramfs-kernel.bin"
   factory: "firmware/openwrt-24.10.3-ramips-mt7621-zyxel_nwa50ax-squashfs-factory.bin"
   sysupgrade: "firmware/openwrt-24.10.3-ramips-mt7621-zyxel_nwa50ax-squashfs-sysupgrade.bin"
   restore: "backup/restore.tar.gz"

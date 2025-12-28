@@ -1,6 +1,7 @@
 targets:
   main:
     features:
+      - ramboot_then_flash
       - console
       - wifi
       - online
@@ -34,15 +35,8 @@ targets:
       - UBootInteractionBoot:
           commands:
             - mtkautoboot
-      - UBootInteractionTftpboot:
-          image: "initramfs"
-          commands:
-            - setenv ipaddr 192.168.0.101
-            - setenv serverip 192.168.0.1
-            - tftpboot $IMAGE
-            - bootm
-      - UBootInteractionBootp:
-          image: "initramfs"
+      - UBootInteractionRamboot:
+          image: "rescue_ramboot"
           mac: "ENV ethaddr"
           bootpip: "192.168.0.101"
           commands:
@@ -88,7 +82,8 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX/" must be 128 char or less
-  initramfs: "firmware/openwrt-24.10.2-mediatek-filogic-cudy_wr3000-v1-initramfs-kernel.bin"
+  target: !template $LG_IMAGE
+  rescue_ramboot: "firmware/openwrt-24.10.2-mediatek-filogic-cudy_wr3000-v1-initramfs-kernel.bin"
   sysupgrade: "firmware/freifunk-falter-1.4.0-mediatek-filogic-cudy_wr3000-v1-squashfs-sysupgrade.bin"
   restore: "backup/restore.tar.gz"
 imports:

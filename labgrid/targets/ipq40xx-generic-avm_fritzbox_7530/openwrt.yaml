@@ -1,6 +1,7 @@
 targets:
   main:
     features:
+      - ramboot_then_flash
       - uboot_ramboot
       - dsl_modem
       - console
@@ -8,7 +9,8 @@ targets:
       - online
     options:
       hostname: 'testdev02'
-      lan_ip: '192.168.102.1'
+      lan_ip: '10.248.248.17'
+      lan_netmask: '255.255.255.240'
       lan_vlan: 102
       connected_port: 'lan1'
     resources:
@@ -35,16 +37,8 @@ targets:
       - UBootInteractionBoot:
           commands:
             - run fritzboot
-      - UBootInteractionTftpboot:
-          image: "initramfs"
-          sleep: 3
-          commands:
-            - setenv ipaddr 192.168.0.102
-            - setenv serverip 192.168.0.1
-            - tftpboot $IMAGE
-            - bootm
-      - UBootInteractionBootp:
-          image: "initramfs"
+      - UBootInteractionRamboot:
+          image: "rescue_ramboot"
           mac: "44:4e:6d:af:9c:57"
           bootpip: "192.168.0.102"
           sleep: 3
@@ -73,8 +67,8 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
-  sysupgrade: "firmware/openwrt-24.10.2-ipq40xx-generic-avm_fritzbox-7530-squashfs-sysupgrade.bin"
-  initramfs: "firmware/openwrt-24.10.2-ipq40xx-generic-avm_fritzbox-7530-initramfs-uImage.itb"
+  target: !template $LG_IMAGE
+  rescue_ramboot: "firmware/openwrt-24.10.2-ipq40xx-generic-avm_fritzbox-7530-initramfs-uImage.itb"
   restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py

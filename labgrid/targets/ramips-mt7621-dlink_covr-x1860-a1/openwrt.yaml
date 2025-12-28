@@ -1,14 +1,16 @@
 targets:
   main:
     features:
+      - uboot_flash
+      - uboot_ramboot
       - console
       - wifi
       - online
       - olsr
     options:
       hostname: 'testdev05'
-      lan_ip: '192.168.105.1'
-      lan_netmask: '255.255.255.0'
+      lan_ip: '10.248.248.65'
+      lan_netmask: '255.255.255.240'
       lan_vlan: 105
       connected_port: 'ethernet'
     resources:
@@ -36,7 +38,7 @@ targets:
           commands:
             - boot
       - UBootInteractionFlash:
-          image: "recovery"
+          image: "target"
           commands:
             - setenv ipaddr 192.168.0.105
             - setenv serverip 192.168.0.1
@@ -44,15 +46,8 @@ targets:
             - nand erase 0x1c0000 0xd40000
             - nand write 0x80010000 0x1c0000 0xd40000
             - boot
-      - UBootInteractionTftpboot:
-          image: "initramfs"
-          commands:
-            - setenv ipaddr 192.168.0.105
-            - setenv serverip 192.168.0.1
-            - tftpboot $IMAGE
-            - bootm
-      - UBootInteractionBootp:
-          image: "initramfs"
+      - UBootInteractionRamboot:
+          image: "target"
           mac: "7e:87:3c:81:4f:61"
           bootpip: "192.168.0.105"
           commands:
@@ -65,7 +60,6 @@ targets:
           boot_secret_nolf: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
-          ubus_ready_timeout: 120
       - OpenWrtUciDriver: {}
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
@@ -76,6 +70,7 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
+  target: !template $LG_IMAGE
   initramfs: "firmware/openwrt-24.10.0-ramips-mt7621-dlink_covr-x1860-a1-initramfs-kernel.bin"
   recovery: "firmware/openwrt-24.10.0-ramips-mt7621-dlink_covr-x1860-a1-squashfs-recovery.bin"
   sysupgrade: "firmware/openwrt-23.05-snapshot-r24145-db554fd450-freifunk-falter-1.4.0-ramips-mt7621-dlink_covr-x1860-a1-squashfs-sysupgrade.bin"

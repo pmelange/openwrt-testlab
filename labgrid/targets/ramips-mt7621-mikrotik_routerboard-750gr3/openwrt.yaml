@@ -1,14 +1,15 @@
 targets:
   main:
     features:
+      - ramboot_then_flash
       - console
       - wifi
       - online
       - olsr
     options:
       hostname: 'testdev09'
-      lan_ip: '192.168.109.1'
-      lan_netmask: '255.255.255.0'
+      lan_ip: '10.248.248.129'
+      lan_netmask: '255.255.255.240'
       lan_vlan: 109
       connected_port: 'wan'
     resources:
@@ -32,8 +33,8 @@ targets:
             output: resetdriver
       - SerialDriver: {}
       - TFTPProviderDriver: {}
-      - MikrotikUBootInteractionBootp:
-          image: "initramfs"
+      - MikrotikUBootInteractionRamboot:
+          image: "rescue_ramboot"
           mac: "b8:69:f4:9c:41:4c"
           bootpip: "192.168.0.109"
           cycle_power: True
@@ -55,7 +56,8 @@ paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
-  initramfs: "firmware/openwrt-23.05.0-rc3-ramips-mt7621-mikrotik_routerboard-750gr3-initramfs-kernel.bin"
+  target: !template $LG_IMAGE
+  rescue_ramboot: "firmware/openwrt-23.05.0-rc3-ramips-mt7621-mikrotik_routerboard-750gr3-initramfs-kernel.bin"
   sysupgrade: "firmware/openwrt-24.10.3-ramips-mt7621-mikrotik_routerboard-750gr3-squashfs-sysupgrade.bin"
   restore: "backup/restore.tar.gz"
 imports:
