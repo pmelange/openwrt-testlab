@@ -165,7 +165,19 @@ class FalterStrategy(Strategy):
                 _, _, error = self.uci.get("ffwizard",
                                            "settings",
                                            "runbefore")
+                self.target.deactivate(self.uci)
                 if error != 0:
+                    # wait for the jffs2 filesystem to be ready.
+                    timeout = Timeout(120.0)
+                    while not timeout.expired:
+                        _, _, exitcode = self.shell.run(f"""df | grep overlayfs:/tmp/root""",
+                                                        timeout=timeout.remaining)
+                        if exitcode == 1:
+                            break
+                        sleep(10)
+                    if exitcode != 1:
+                        raise StrategyError(f"""timeout waiting for openwrt to be ready: 120 sec expired""")
+
                     self.target.activate(self.ffwizard)
                     self.ffwizard.configure()
                     self.target.deactivate(self.ffwizard)
