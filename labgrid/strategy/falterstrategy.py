@@ -17,11 +17,9 @@ class Status(enum.Enum):
     unknown = auto()
     off = auto()
     on = auto()
-    uboot_shell = auto()
-    uboot_boot = auto()
-    uboot_flash = auto()
-    uboot_tftpboot = auto()
-    uboot_bootp = auto()
+    boot = auto()
+    ramboot = auto()
+    flash = auto()
     shell = auto()
     config = auto()
     ffwizard = auto()
@@ -49,78 +47,8 @@ class FalterStrategy(Strategy):
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
-        self._ubootready = False
-        self._shellready = False
-        self._configured = None
-        self._ffwizard = None
         self.exporter_release_lease()
-
-    @step()         
-    def determine_status(self):
-        # try to determine the current status
-        self.target.activate(self.power)
-        if self.power.get():
-            self.status = Status.on
-            self.target.activate(self.console)
-            expectations = [self.uboot.prompt,
-                            self.shell.prompt,
-                            TIMEOUT]
-            self.console.sendline("")
-            index, _, _, _ = self.console.expect(expectations, timeout=5)
-            if index == 0:
-                self._ubootready = True
-                self.status = Status.uboot_shell
-            elif index == 1:
-                self._shellready = True
-                self.status = Status.shell
-            else:
-                # unable to determine state. Set to a known state of off.
-                self.power.off()
-                self._shellready = False
-            if self._shellready:
-                # check to see if we are configured
-                self.console.sendline("")
-                self.target.activate(self.uci)
-                _, _, error = self.uci.get("system", 
-                                           "@system[0]", 
-                                           "labgridconfig")
-                if error == 0:
-                    self.status = Status.config
-                    self._configured = True
-                    # We are at least configured, set up the networking
-                    try:
-                        self.exporter_renew_lease()
-                    except SystemError:
-                        pass
-                else:
-                    self._configured = False
-
-                # check to see if ffwizard has been run
-                _, _, error = self.uci.get("ffwizard",
-                                           "settings",
-                                           "runbefore")
-                if error == 0:
-                    self.status = Status.ffwizard
-                    self._ffwizard = True
-                else:
-                    self._ffwizard = False
-
-                self.target.deactivate(self.uci)
-            #self.target.deactivate(self.console)
-        else:
-            # power is off
-            self.status = Status.off
-            self._shellready = False
-            self._ubootready = False
-            self._configured = None
-            self._ffwizard = None
-            self.exporter_release_lease()
-        print("Determined that the current state is:")
-        print(f"""   status = {self.status.name}""")
-        print(f"""   shellready = {self._shellready}""")
-        print(f"""   ubootready = {self._ubootready}""")
-        print(f"""   configured = {self._configured}""")
-        print(f"""   ffwizard = {self._ffwizard}""")
+        self._features = self.target.env.get_target_features()
 
     @step()
     def exporter_release_lease(self):
@@ -149,9 +77,6 @@ class FalterStrategy(Strategy):
         if not isinstance(status, Status):
             status = Status[status]
 
-        if self.status == Status.unknown:
-            self.determine_status()
-            
         #
         # State Machine starts here
         #
@@ -166,67 +91,84 @@ class FalterStrategy(Strategy):
                 self.target.deactivate(self.console)
                 self.target.activate(self.power)
                 self.power.off()
-                self._shellready = False
-                self._ubootready = False
                 self.exporter_release_lease()
+                self.target.deactivate(self.power)
 
             case Status.on:
                 self.transition(Status.off)
                 self.target.activate(self.console)
                 self.power.cycle()
+                self.target.deactivate(self.power)
 
-            case Status.uboot_shell | Status.uboot_boot | Status.uboot_flash | Status.uboot_tftpboot | Status.uboot_bootp:
+            case status.boot:
                 self.target.activate(self.uboot)
+                self.uboot.boot()
+                self.target.deactivate(self.uboot)
 
-                self._ubootready = True
-                self._shellready = False
-                self._configured = None
-                self._ffwizard = None
-                match status:
-                    case Status.uboot_boot:
-                        self.uboot.boot()
-                    case Status.uboot_flash:
-                        self.uboot.flash()
-                    case Status.uboot_tftpboot:
-                        self.uboot.tftpboot()
-                    case Status.uboot_bootp:
-                        self.uboot.bootp()
-                if status != Status.uboot_shell:
-                    self._ubootready = False
+            case status.ramboot:
+                # boot an initramfs image if supported
+                if 'uboot_ramboot' in self._features:
+                    self.target.activate(self.uboot)
+                    self.uboot.ramboot()
+                    self.target.deactivate(self.uboot)
+                else:
+                    raise StrategyError("The env.yaml file does not support a ramboot method")
+
+            case status.flash:
+                # determine how to flash the target based on the 'features'
+                if 'ramboot_then_flash' in self._features:
+                    self.target.activate(self.uboot)
+                    self.uboot.image = self.target.env.config.get_image_path("rescue_ramboot")
+                    self.uboot.ramboot()
+                    self.target.deactivate(self.uboot)
+                    self.transition(Status.config)
+                    self.target.activate(self.ssh)
+                    self.ssh.put(self.target.env.config.get_image_path("target"),
+                                 "/tmp/image.bin")
+                    self.target.deactivate(self.ssh)
+                    # flash the target image, reboots automatically
+                    self.shell.sysupgrade("/tmp/image.bin", force=True, keepconfig=False)
+                    self.target.deactivate(self.shell)
+                    self.target.activate(self.shell)
+                elif 'uboot_flash' in self._features:
+                    self.target.activate(self.uboot)
+                    self.uboot.flash()
+                    self.target.deactivate(self.uboot)
+                else:
+                    raise StrategyError("The env.yaml file does not support a flash method")
 
             case Status.shell:
-                if not self.power.get() or self._ubootready:
-                    # reboot without uboot interaction
+                self.target.activate(self.power)
+                if self.power.get() == False:
                     self.transition(Status.on)
-                    self._shellready = False
-                if not self._shellready:
-                    self.target.activate(self.shell)
-                    self._shellready = True
-                if self._configured == None or self._ffwizard == None:
-                    self.determine_status()
+                self.target.deactivate(self.power)
+                self.target.activate(self.shell)
 
             case Status.config:
                 # Preconfigure a fresh router based on the env's config params
                 # This can set up the WAN/LAN ports as needed as well as
                 # predefined IP addresses.
-                if not self.power.get() or not self._shellready:
-                    self.transition(Status.shell)
-                if not self._configured:
-                    self.target.activate(self.uci)
+                self.transition(Status.shell)
+                self.target.activate(self.uci)
+                _, _, error = self.uci.get("system",
+                                           "@system[0]",
+                                           "labgridconfig")
+                if error != 0:
                     self.uci.configure()
-                    self.target.deactivate(self.uci)
-                    self._configured = True
+                self.target.deactivate(self.uci)
                 self.exporter_renew_lease()
 
             case Status.ffwizard:
                 # Run the ffwizard once the firstconfig is set up
-                if not self.power.get() or not self._configured:
-                    self.transition(Status.config)
-                if not self._ffwizard:
+                self.transition(Status.config)
+                self.target.activate(self.uci)
+                _, _, error = self.uci.get("ffwizard",
+                                           "settings",
+                                           "runbefore")
+                if error != 0:
                     self.target.activate(self.ffwizard)
                     self.ffwizard.configure()
                     self.target.deactivate(self.ffwizard)
-                    self._ffwizard = True
                     # Wait for "reboot: Restarting system" on console
                     self.target.activate(self.console)
                     expectations = ["reboot: Restarting system", 
@@ -246,37 +188,26 @@ class FalterStrategy(Strategy):
 
             case Status.reboot:
                 # runs reboot on the command if the shell is ready
-                if not self._shellready:
-                    self.transition(Status.shell)
-                else:
-                    self.shell.run("reboot")
-                    self._shellready = False
-                    self.exporter_release_lease()
-                    self.target.deactivate(self.shell)
-                    self.target.activate(self.shell)
+                self.transition(Status.shell)
+                self.target.activate(self.shell)
+                self.shell.run("reboot")
+                self.exporter_release_lease()
+                self.target.deactivate(self.shell)
+                self.target.activate(self.shell)
 
             case Status.reset:
                 # runs firstboot
-                if not self._shellready:
-                    self.transition(Status.shell)
-                else:
-                    self.target.activate(self.shell)
+                self.transition(Status.shell)
                 self.shell.run("firstboot -y")
-                self._configured = None
-                self._ffwizard = None
                 self.transition(Status.reboot)
 
             case Status.hardreset:
                 # use the reset button to reset the device
-                if not self._shellready:
-                    self.transition(Status.shell)
+                self.transition(Status.shell)
                 self.target.activate(self.reset)
                 self.reset.press_for()
                 self.target.deactivate(self.reset)
                 # Hard reset done, reboots automatically
-                self._shellready = False
-                self._configured = None
-                self._ffwizard = None
                 self.target.deactivate(self.shell)
                 self.target.activate(self.shell)
 

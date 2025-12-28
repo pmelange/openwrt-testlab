@@ -131,13 +131,7 @@ class UBootInteractionFlash(UBootInteraction):
 
 @target_factory.reg_driver
 @attr.s(eq=False)
-class UBootInteractionTftpboot(UBootInteraction):
-    def __attrs_post_init__(self):
-        super().__attrs_post_init__()
-
-@target_factory.reg_driver
-@attr.s(eq=False)
-class UBootInteractionBootp(UBootInteraction):
+class UBootInteractionRamboot(UBootInteraction):
     mac = attr.ib(default="", validator=attr.validators.instance_of(str))
     bootpip = attr.ib(default="", validator=attr.validators.instance_of(str))
 
@@ -148,6 +142,7 @@ class UBootInteractionBootp(UBootInteraction):
     def prepare(self):
         super().prepare() # set up tftp
 
+        # set up bootp if a mac address and bootpip address are provided
         if self.mac != "" and self.bootpip != "":
             if re.match("^ENV", self.mac):
                 result, _, _ = self._run("printenv " + self.mac[4:])
@@ -169,7 +164,7 @@ class UBootInteractionBootp(UBootInteraction):
 
 @target_factory.reg_driver
 @attr.s(eq=False)
-class MikrotikUBootInteractionBootp(UBootInteractionBootp):
+class MikrotikUBootInteractionRamboot(UBootInteractionRamboot):
     mac = attr.ib(default="", validator=attr.validators.instance_of(str))
     bootpip = attr.ib(default="", validator=attr.validators.instance_of(str))
     cycle_power = attr.ib(default=False, validator=attr.validators.instance_of(bool))
@@ -184,7 +179,6 @@ class MikrotikUBootInteractionBootp(UBootInteractionBootp):
         super().prepare() # set up tftp and dnsmasq
 
         if self.mac != "" and self.bootpip != "":
-
             self.reset.press()
             self.power.cycle()
             sleep(self.hold_timeout)

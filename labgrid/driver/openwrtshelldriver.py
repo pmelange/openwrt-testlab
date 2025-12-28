@@ -116,10 +116,13 @@ class OpenWrtShellDriver(ShellDriver):
                         "--force" if force else "",
                         "-n" if not keepconfig else "",
                         binfile])
-        try:
-            self._run(cmd, timeout=15.0)
-        except TIMEOUT:
-            pass
+        self.console.sendline(cmd)
+        expectations = ["Upgrade completed",
+                        "Rebooting system",
+                        TIMEOUT]
+        index, _, _, _ = self.console.expect(expectations, timeout=120)
+        if index == 2:
+            raise ExecutionError("Router is failing with sysupgrade")
 
     @Driver.check_active
     @step()

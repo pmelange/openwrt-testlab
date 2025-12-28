@@ -10,7 +10,7 @@ from labgrid.driver import Driver
 from labgrid.protocol import ConsoleProtocol, PowerProtocol, ButtonProtocol
 from labgrid.driver import UBootDriver
 from labgrid.util import re_vt100
-from driver.ubootinteraction import UBootInteractionBoot, UBootInteractionFlash, UBootInteractionTftpboot, UBootInteractionBootp
+from driver.ubootinteraction import UBootInteractionBoot, UBootInteractionFlash, UBootInteractionRamboot
 
 @target_factory.reg_driver
 @attr.s(eq=False)
@@ -56,8 +56,7 @@ class OpenWrtUBootDriver(UBootDriver):
             "reset": ButtonProtocol,
             "_boot": {UBootInteractionBoot, None},
             "_flash": {UBootInteractionFlash, None},
-            "_tftpboot": {UBootInteractionTftpboot, None},
-            "_bootp": {UBootInteractionBootp, None},
+            "_ramboot": {UBootInteractionRamboot, None},
             }
 
     boot_expression = attr.ib(default=r"U-Boot 20\d+", validator=attr.validators.instance_of(str))
@@ -185,15 +184,11 @@ class OpenWrtUBootDriver(UBootDriver):
     def flash(self):
         if self._flash is not None:
             self._do_interaction(self._flash)
+        # TODO Add exception if None
 
     @Driver.check_active
     @step()
-    def tftpboot(self):
-        if self._tftpboot is not None:
-            self._do_interaction(self._tftpboot)
-
-    @Driver.check_active
-    @step()
-    def bootp(self):
-        if self._bootp is not None:
-            self._do_interaction(self._bootp)
+    def ramboot(self):
+        if self._ramboot is not None:
+            self._do_interaction(self._ramboot)
+        # TODO Add exception if None
