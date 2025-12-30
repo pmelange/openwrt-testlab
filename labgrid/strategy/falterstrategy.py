@@ -92,7 +92,7 @@ class FalterStrategy(Strategy):
                 self.target.activate(self.power)
                 self.power.off()
                 self.exporter_release_lease()
-                self.target.deactivate(self.power)
+                #self.target.deactivate(self.power)
 
             case Status.on:
                 self.transition(Status.off)
@@ -107,7 +107,7 @@ class FalterStrategy(Strategy):
 
             case status.ramboot:
                 # boot an initramfs image if supported
-                if 'uboot_ramboot' in self._features:
+                if 'ramboot' in self._features:
                     self.target.activate(self.uboot)
                     self.uboot.ramboot()
                     self.target.deactivate(self.uboot)
@@ -118,7 +118,7 @@ class FalterStrategy(Strategy):
                 # determine how to flash the target based on the 'features'
                 if 'ramboot_then_flash' in self._features:
                     self.target.activate(self.uboot)
-                    self.uboot.image = self.target.env.config.get_image_path("rescue_ramboot")
+                    self.uboot._ramboot.image = "rescue_ramboot"
                     self.uboot.ramboot()
                     self.target.deactivate(self.uboot)
                     self.transition(Status.config)
@@ -130,7 +130,7 @@ class FalterStrategy(Strategy):
                     self.shell.sysupgrade("/tmp/image.bin", force=True, keepconfig=False)
                     self.target.deactivate(self.shell)
                     self.target.activate(self.shell)
-                elif 'uboot_flash' in self._features:
+                elif 'flash' in self._features:
                     self.target.activate(self.uboot)
                     self.uboot.flash()
                     self.target.deactivate(self.uboot)

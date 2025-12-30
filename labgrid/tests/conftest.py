@@ -1,6 +1,35 @@
 import pytest
 
 @pytest.fixture(scope="session")
+def features(env):
+    return (env.get_target_features())
+
+@pytest.fixture(scope="session")
+def ramboot(features):
+    return ("ramboot" in features)
+
+@pytest.fixture(scope="session")
+def flash(features):
+    return ("flash" in features)
+
+@pytest.fixture(scope="session")
+def ramboot_then_flash(features):
+    return ("ramboot_then_flash" in features)
+
+@pytest.fixture(scope="session")
+def load_target(strategy, ramboot_then_flash, flash, ramboot):
+    transition = None
+    if ramboot_then_flash or flash:
+        transition = "flash"
+    if ramboot:
+        transition = "ramboot"
+    try:
+        strategy.transition(transition)
+        return strategy
+    except Exception:
+        pytest.exit(f"Failed to transition to state {transition}", returncode=3)
+
+@pytest.fixture(scope="session")
 def shell_command(strategy, load_target):
     try:
         strategy.transition("shell")
@@ -17,7 +46,6 @@ def configured(strategy, shell_command):
         pytest.exit("Failed to transition to state config", returncode=3)
 
 @pytest.fixture(scope="session")
-@pytest.mark.lg_feature("ffwizard")
 def ffwizard(strategy, configured):
     try:
         strategy.transition("ffwizard")
@@ -25,29 +53,3 @@ def ffwizard(strategy, configured):
     except Exception:
         pytest.exit("Failed to transition to state ffwizard", returncode=3)
 
-@pytest.fixture(scope="session")
-@pytest.mark.lg_feature("ramboot")
-def load_target(strategy):
-    try:
-        strategy.transition("ramboot")
-        return strategy
-    except Exception:
-        pytest.exit("Failed to transition to state ramboot", returncode=3)
-
-@pytest.fixture(scope="session")
-@pytest.mark.lg_feature("flash")
-def load_target(strategy):
-    try:
-        strategy.transition("flash")
-        return strategy
-    except Exception:
-        pytest.exit("Failed to transition to state flash", returncode=3)
-
-@pytest.fixture(scope="session")
-@pytest.mark.lg_feature("ramboot_then_flash")
-def load_target(strategy):
-    try:
-        strategy.transition("flash")
-        return strategy
-    except Exception:
-        pytest.exit("Failed to transition to state flash via ramboot", returncode=3)
