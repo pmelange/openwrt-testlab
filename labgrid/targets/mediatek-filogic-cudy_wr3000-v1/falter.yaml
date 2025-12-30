@@ -36,7 +36,7 @@ targets:
           commands:
             - mtkautoboot
       - UBootInteractionRamboot:
-          image: "rescue_ramboot"
+          image: "target"
           mac: "ENV ethaddr"
           bootpip: "192.168.0.101"
           commands:

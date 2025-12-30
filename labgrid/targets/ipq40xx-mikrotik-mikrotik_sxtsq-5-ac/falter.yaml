@@ -33,7 +33,7 @@ targets:
       - SerialDriver: {}
       - TFTPProviderDriver: {}
       - MikrotikUBootInteractionRamboot:
-          image: "rescue_ramboot"
+          image: "target"
           mac: "dc:2c:6e:c3:fa:b9"
           bootpip: "192.168.0.104"
           cycle_power: True

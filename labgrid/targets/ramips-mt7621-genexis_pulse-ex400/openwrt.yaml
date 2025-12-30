@@ -37,7 +37,7 @@ targets:
           commands:
             - boot
       - UBootInteractionBootp:
-          image: "rescue_ramboot"
+          image: "target"
           mac: "44:d4:37:8c:13:78"
           bootpip: "192.168.0.106"
           commands:

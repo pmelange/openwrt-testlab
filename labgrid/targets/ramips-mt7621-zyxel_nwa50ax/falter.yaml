@@ -36,7 +36,7 @@ targets:
           commands:
             - atgo
       - UBootInteractionRamboot:
-          image: "initramfs"
+          image: "target"
           mac: "fa:26:d7:78:e2:6c"
           bootpip: "192.168.0.108"
           commands:

@@ -2,10 +2,10 @@ targets:
   main:
     features:
       - ramboot_then_flash
+      - ramboot
       - console
       - wifi
       - online
-      - olsr
     options:
       hostname: 'testdev01'
       lan_ip: '10.248.248.1'
@@ -37,7 +37,7 @@ targets:
           commands:
             - mtkautoboot
       - UBootInteractionRamboot:
-          image: "rescue_ramboot"
+          image: "target"
           mac: "ENV ethaddr"
           bootpip: "192.168.0.101"
           commands:

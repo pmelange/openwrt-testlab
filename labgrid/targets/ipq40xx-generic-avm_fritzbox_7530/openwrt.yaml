@@ -38,7 +38,7 @@ targets:
           commands:
             - run fritzboot
       - UBootInteractionRamboot:
-          image: "rescue_ramboot"
+          image: "target"
           mac: "44:4e:6d:af:9c:57"
           bootpip: "192.168.0.102"
           sleep: 3
