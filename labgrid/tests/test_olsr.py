@@ -1,6 +1,11 @@
 import pytest
 
 @pytest.mark.lg_feature("olsr")
+def test_olsr_installed(ffwizard, shell_command):
+    result, _, _ = shell_command.run("opkg info olsrd")
+    assert "installed" in " ".join(result)
+
+@pytest.mark.lg_feature("olsr")
 def test_olsr_pid(ffwizard, shell_command):
     pid, _, _ = shell_command.run("cat /tmp/run/olsrd.pid")
     _, _ ,running = shell_command.run(f"""test -d /proc/{pid[0]}""")
