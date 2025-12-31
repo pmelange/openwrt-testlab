@@ -1,7 +1,7 @@
 import pytest
 
 @pytest.mark.lg_feature("olsr")
-def test_olsr_installed(ffwizard, shell_command):
+def test_olsr_installed(shell_command):
     result, _, _ = shell_command.run("opkg info olsrd")
     assert "installed" in " ".join(result)
 

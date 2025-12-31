@@ -173,7 +173,8 @@ class OpenWrtUciDriver(Driver):
     def reload_config(self):
         cmd = f"""reload_config"""
         data, _, errorcode = self.shell.run(cmd)
-        sleep(0.5) # let the system reconfigure before going furthen
+        sleep(2) # let the system reconfigure before going furthen
+        self.shell.run("/etc/init.d/dnsmasq restart")
         return (data, [], errorcode)
 
     def _find_device(self, device):
@@ -368,7 +369,6 @@ class OpenWrtUciDriver(Driver):
                  datetime.now().strftime("%Y-%m-%d@%H:%M:%S"))
         self.commit()
         self.reload_config()
-        self.shell.run("/etc/init.d/dnsmasq restart")
 
     @Driver.check_active
     @step(args=['configs'])
