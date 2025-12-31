@@ -216,8 +216,6 @@ class OpenWrtUciDriver(Driver):
         wan_dev = self.get('network', 'wan', 'device')
         wan_device = wan_dev[0][0]
 
-        connected_port = self.target.env.config.get_target_option(self.target.name,
-                                                                  'connected_port')
         lan_vlan = self.target.env.config.get_target_option(self.target.name,
                                                             'lan_vlan')
         lan_ip = self.target.env.config.get_target_option(self.target.name,
@@ -229,9 +227,12 @@ class OpenWrtUciDriver(Driver):
         self.set('network', 'lan', 'ipaddr', lan_ip)
         self.set('network', 'lan', 'netmask', lan_netmask)
 
-        # assume DSA switch unless feature 'swconfig' is set
-        if 'swconfig' not in self.target.env.get_target_features():
+        # assume DSA switch unless 'swconfig' is installed
+        _, _, errorcode = self.shell.run("which swconfig")
+        if errorcode == 1:
             # DSA switch
+            connected_port = self.target.env.config.get_target_option(self.target.name,
+                                                                      'connected_port')
             if lan_dev[2] == 0:
                 lan_dev_section = self._find_device(lan_device)
                 self.del_list('network', lan_dev_section, 'ports', connected_port)
@@ -271,19 +272,25 @@ class OpenWrtUciDriver(Driver):
         else:
             # swconfig switch
             ports = self.target.env.config.get_target_option(self.target.name,
-                                                             'ports')
+                                                             'switch_ports')
             cpuport = self.target.env.config.get_target_option(self.target.name,
-                                                               'cpuport')
+                                                               'switch_cpuport')
+            connected_port = self.target.env.config.get_target_option(self.target.name,
+                                                                      "switch_connected_port")
             switch_device = self.get('network', '@switch[0]', 'name')[0][0]
             # LAN
             if lan_dev[2] == 0:
                 lan_dev_section = self._find_device(lan_device)
                 # update device section to new vlan
                 lan_ports = self.get('network', lan_dev_section, 'ports')[0][0]
-                old_vlan = lan_ports[-1]
+                eth = lan_ports.split('.')[0]
+                if '.' in lan_ports:
+                    old_vlan = lan_ports.split('.')[1]
+                else: # case where vlans were not set up
+                    old_vlan = '1'
                 self.del_list('network', lan_dev_section, 'ports', lan_ports)
                 self.add_list('network', lan_dev_section, 'ports', 
-                              lan_ports[:-1] + str(lan_vlan))
+                              eth + '.' + str(lan_vlan))
                 # update switch_vlan section to new vlan and port config
                 switch_vlan_section = self._find_switch_vlan(old_vlan)
                 self.set('network', switch_vlan_section, 'vlan', lan_vlan)
@@ -310,7 +317,8 @@ class OpenWrtUciDriver(Driver):
                 
             else:
                 # create WAN since it doesn't exist
-                wan_device = lan_ports[:-1] + str(int(lan_ports[-1])+1)
+                wan_vlan = str(int(old_vlan)+10) # use a number > 10 to be safe
+                wan_device = eth + '.' + wan_vlan
                 self.set('network', 'interface', None, 'wan')
                 self.set('network', 'wan', 'proto', 'dhcp')
                 self.set('network', 'wan', 'device', wan_device)
@@ -321,7 +329,8 @@ class OpenWrtUciDriver(Driver):
                 switch_vlan_section = 'wan_vlan'
                 self.set('network', 'switch_vlan', None, switch_vlan_section)
                 self.set('network', switch_vlan_section, 'device', switch_device)
-                self.set('network', switch_vlan_section, 'vlan', wan_device[-1])
+                self.set('network', switch_vlan_section, 'vlan', wan_vlan)
+                self.set('network', switch_vlan_section, 'vid', wan_vlan)
             
             self.set('network', switch_vlan_section, 'ports', 
                      f"""{cpuport}t {connected_port}""")
@@ -359,6 +368,7 @@ class OpenWrtUciDriver(Driver):
                  datetime.now().strftime("%Y-%m-%d@%H:%M:%S"))
         self.commit()
         self.reload_config()
+        self.shell.run("/etc/init.d/dnsmasq restart")
 
     @Driver.check_active
     @step(args=['configs'])
