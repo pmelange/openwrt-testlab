@@ -1,9 +1,10 @@
 targets:
   main:
     features:
-      - uboot_flash
-      - swconfig
+      - falter
+      - flash
       - console
+      - reset
       - wifi
       - online
       - olsr

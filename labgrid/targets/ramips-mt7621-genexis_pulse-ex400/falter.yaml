@@ -1,8 +1,10 @@
 targets:
   main:
     features:
+      - falter
       - ramboot_then_flash
       - console
+      - reset
       - wifi
       - online
       - olsr

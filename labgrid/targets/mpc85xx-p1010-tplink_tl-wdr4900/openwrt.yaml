@@ -1,12 +1,12 @@
 targets:
   main:
     features:
-      - uboot_flash
-      - uboot_ramboot
+      - flash
+      - ramboot
       - console
+      - reset
       - wifi
       - online
-      - olsr
     options:
       hostname: 'testdev03'
       lan_ip: '10.248.248.33'

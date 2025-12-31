@@ -4,6 +4,7 @@ targets:
       - ramboot_then_flash
       - ramboot
       - console
+      - reset
       - wifi
       - online
     options:

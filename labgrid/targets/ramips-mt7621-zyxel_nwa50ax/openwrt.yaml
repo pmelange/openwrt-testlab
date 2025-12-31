@@ -3,9 +3,9 @@ targets:
     features:
       - ramboot_then_rescue
       - console
+      - reset
       - wifi
       - online
-      - olsr
     options:
       hostname: 'testdev08'
       lan_ip: '10.248.248.113'
