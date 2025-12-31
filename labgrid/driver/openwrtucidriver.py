@@ -172,10 +172,10 @@ class OpenWrtUciDriver(Driver):
     @step()
     def reload_config(self):
         cmd = f"""reload_config"""
-        data, _, errorcode = self.shell.run(cmd)
+        result = self.shell.run(cmd)
         sleep(2) # let the system reconfigure before going furthen
         self.shell.run("/etc/init.d/dnsmasq restart")
-        return (data, [], errorcode)
+        return result
 
     def _find_device(self, device):
         if device.startswith('br-'):
@@ -309,23 +309,34 @@ class OpenWrtUciDriver(Driver):
                 pass
             
             # WAN
+            wan_vlan = str(int(old_vlan)+10) # use a number > 10 to be safe
+            wan_device = eth + '.' + wan_vlan
             if wan_dev[2] == 0:
                 # WAN exists
                 wan_dev_section = self._find_device(wan_device)
                 if wan_dev_section is not None:
-                    wan_device = self.get('network', wan_dev_section, 'ports')[0][0]
-                switch_vlan_section = self._find_switch_vlan(wan_device[-1])
+                    result = self.get('network', wan_dev_section, 'ports')
+                    if result[2] != 0:
+                        # no port on the wan device, add it
+                        self.add_list('network', wan_dev_section, 'ports'. wan_device) 
+                    else:
+                        wan_device = result[0][0]
+                        if '.' in wan_device:
+                            wan_vlan = wan_device.split('.')[1]
+
+                switch_vlan_section = self._find_switch_vlan(wan_device)
                 
             else:
                 # create WAN since it doesn't exist
-                wan_vlan = str(int(old_vlan)+10) # use a number > 10 to be safe
-                wan_device = eth + '.' + wan_vlan
                 self.set('network', 'interface', None, 'wan')
                 self.set('network', 'wan', 'proto', 'dhcp')
                 self.set('network', 'wan', 'device', wan_device)
                 self.set('network', 'interface', None, 'wan6')
                 self.set('network', 'wan6', 'proto', 'dhcpv6')
                 self.set('network', 'wan6', 'device', wan_device)
+                switch_vlan_section = None
+
+            if switch_vlan_section is None:
                 # create the switch_vlan section
                 switch_vlan_section = 'wan_vlan'
                 self.set('network', 'switch_vlan', None, switch_vlan_section)
