@@ -310,7 +310,7 @@ class OpenWrtUciDriver(Driver):
             
             # WAN
             wan_vlan = str(int(old_vlan)+10) # use a number > 10 to be safe
-            wan_device = eth + '.' + wan_vlan
+            wan_port = eth + '.' + wan_vlan
             if wan_dev[2] == 0:
                 # WAN exists
                 wan_dev_section = self._find_device(wan_device)
@@ -318,22 +318,23 @@ class OpenWrtUciDriver(Driver):
                     result = self.get('network', wan_dev_section, 'ports')
                     if result[2] != 0:
                         # no port on the wan device, add it
-                        self.add_list('network', wan_dev_section, 'ports'. wan_device) 
+                        self.add_list('network', wan_dev_section, 'ports', wan_port) 
                     else:
-                        wan_device = result[0][0]
-                        if '.' in wan_device:
+                        # port (and vlan) exists, use it
+                        wan_port = result[0][0]
+                        if '.' in wan_port:
                             wan_vlan = wan_device.split('.')[1]
 
-                switch_vlan_section = self._find_switch_vlan(wan_device)
+                switch_vlan_section = self._find_switch_vlan(wan_vlan)
                 
             else:
                 # create WAN since it doesn't exist
                 self.set('network', 'interface', None, 'wan')
                 self.set('network', 'wan', 'proto', 'dhcp')
-                self.set('network', 'wan', 'device', wan_device)
+                self.set('network', 'wan', 'device', wan_port)
                 self.set('network', 'interface', None, 'wan6')
                 self.set('network', 'wan6', 'proto', 'dhcpv6')
-                self.set('network', 'wan6', 'device', wan_device)
+                self.set('network', 'wan6', 'device', wan_port)
                 switch_vlan_section = None
 
             if switch_vlan_section is None:
