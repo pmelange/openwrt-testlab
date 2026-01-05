@@ -61,7 +61,7 @@ targets:
             - boot
       - OpenWrtUBootDriver:
           prompt: '=>'
-          boot_expression: 'Autobooting in'
+          autoboot: 'Autobooting in'
           boot_secret: 'lv'
           boot_secret_nolf: True
       - OpenWrtShellDriver:

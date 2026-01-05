@@ -46,7 +46,7 @@ targets:
             - bootm
       - OpenWrtUBootDriver:
           prompt: 'MT7981>'
-          boot_expression: 'RESET button is pressed'
+          autoboot: 'RESET button is pressed'
           boot_secret: '\x03'
           boot_secret_nolf: True
           hold_reset_before_uboot: True

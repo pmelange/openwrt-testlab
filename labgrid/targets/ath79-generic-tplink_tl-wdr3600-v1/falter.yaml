@@ -51,7 +51,7 @@ targets:
             - reset
       - OpenWrtUBootDriver:
           prompt: 'db12x>'
-          boot_expression: 'Autobooting in'
+          autoboot: 'Autobooting in'
           boot_secret: 'tpl'
           boot_secret_nolf: True
       - OpenWrtShellDriver:

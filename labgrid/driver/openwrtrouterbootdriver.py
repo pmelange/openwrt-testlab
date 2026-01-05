@@ -58,7 +58,7 @@ class OpenWrtRouterBootDriver(UBootDriver):
             "_bootp": {UBootInteractionBootp, None},
             }
 
-    boot_expression = attr.ib(default=r"U-Boot 20\d+", validator=attr.validators.instance_of(str))
+    autoboot = attr.ib(default=r"U-Boot 20\d+", validator=attr.validators.instance_of(str))
     boot_secret = attr.ib(default="a", validator=attr.validators.instance_of(str))
     boot_secret_nolf = attr.ib(default=False, validator=attr.validators.instance_of(bool))
     login_timeout = attr.ib(default=60, validator=attr.validators.instance_of(int))
@@ -66,14 +66,14 @@ class OpenWrtRouterBootDriver(UBootDriver):
     @step()
     def _await_prompt(self):
         """
-        Await autoboot_expression. If this line was read enter the 'secret' (or a
+        Await autoboot expression. If this line was read enter the 'secret' (or a
         single character) to interrupt normal boot.
         """
 
         # wait for boot expression. Afterwards enter secret
         timeout = Timeout(float(self.login_timeout))
         expectations = [self.prompt,
-                        self.boot_expression,
+                        self.autoboot,
                         TIMEOUT]
         last_before = None
 

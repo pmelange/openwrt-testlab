@@ -47,7 +47,7 @@ targets:
             - bootm
       - OpenWrtUBootDriver:
           prompt: '->'
-          boot_expression: 'stop autoboot'
+          autoboot: 'stop autoboot'
           boot_secret: 'a'
           boot_secret_nolf: True
       - OpenWrtShellDriver:
