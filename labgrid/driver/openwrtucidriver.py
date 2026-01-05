@@ -177,7 +177,7 @@ class OpenWrtUciDriver(Driver):
         self.shell.run("/etc/init.d/dnsmasq restart")
         return result
 
-    def _find_device(self, device):
+    def _find_bridge_device(self, device):
         if device.startswith('br-'):
             idx = 0
             result = [0, 0, 0]
@@ -235,12 +235,12 @@ class OpenWrtUciDriver(Driver):
             connected_port = self.target.env.config.get_target_option(self.target.name,
                                                                       'connected_port')
             if lan_dev[2] == 0:
-                lan_dev_section = self._find_device(lan_device)
+                lan_dev_section = self._find_bridge_device(lan_device)
                 self.del_list('network', lan_dev_section, 'ports', connected_port)
                 self.add_list('network', lan_dev_section, 'ports', 
                               connected_port + '.' + str(lan_vlan))
                 if wan_dev[2] == 0:
-                    wan_dev_section = self._find_device(wan_device)
+                    wan_dev_section = self._find_bridge_device(wan_device)
                     if wan_dev_section is None:
                         if wan_device != connected_port:
                             self.add_list('network', lan_dev_section, 'ports', 
@@ -281,7 +281,7 @@ class OpenWrtUciDriver(Driver):
             switch_device = self.get('network', '@switch[0]', 'name')[0][0]
             # LAN
             if lan_dev[2] == 0:
-                lan_dev_section = self._find_device(lan_device)
+                lan_dev_section = self._find_bridge_device(lan_device)
                 # update device section to new vlan
                 lan_ports = self.get('network', lan_dev_section, 'ports')[0][0]
                 eth = lan_ports.split('.')[0]
@@ -313,7 +313,7 @@ class OpenWrtUciDriver(Driver):
             wan_port = eth + '.' + wan_vlan
             if wan_dev[2] == 0:
                 # WAN exists
-                wan_dev_section = self._find_device(wan_device)
+                wan_dev_section = self._find_bridge_device(wan_device)
                 if wan_dev_section is not None:
                     result = self.get('network', wan_dev_section, 'ports')
                     if result[2] != 0:
@@ -323,8 +323,10 @@ class OpenWrtUciDriver(Driver):
                         # port (and vlan) exists, use it
                         wan_port = result[0][0]
                         if '.' in wan_port:
-                            wan_vlan = wan_device.split('.')[1]
-
+                            wan_vlan = wan_port.split('.')[1]
+                else:
+                    if '.' in wan_device:
+                        wan_vlan = wan_device.split('.')[1]
                 switch_vlan_section = self._find_switch_vlan(wan_vlan)
                 
             else:
