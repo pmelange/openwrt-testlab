@@ -20,7 +20,7 @@ def test_ffuplink_initialized(ffwizard, shell_command):
     assert data["up"] == True
 
 @pytest.mark.lg_feature(["falter", "online"])
-def test_ffuplink_up(ffwizard, shell_command):
+def test_ffuplink_has_ip_addr(ffwizard, shell_command):
     result, _, errorcode = shell_command.run("ip addr show dev ffuplink")
     assert "UP" in result[0]
 
@@ -31,7 +31,25 @@ def test_ffuplink_up(ffwizard, shell_command):
     assert ipaddr is not None
 
 @pytest.mark.lg_feature(["falter", "online"])
+def test_ffuplink_default_route(ffwizard, shell_command):
+    _, _, errorcode = shell_command.run("ip r g 8.8.8.8 oif ffuplink")
+    assert errorcode == 0
+
+@pytest.mark.lg_feature(["falter", "online"])
 def test_ffuplink_ping_dot8(ffwizard, shell_command):
     _, _, errorcode = shell_command.run("ping -c 3 -I ffuplink 8.8.8.8")
     assert errorcode == 0
 
+@pytest.mark.parametrize("iface", ["wireless0", "wireless1"])
+@pytest.mark.lg_feature(["falter", "wifi"])
+def test_wifi_mesh_interface(ffwizard, shell_command, iface):
+    # find out which interface is associated with the iface
+    result, _, errorcode = shell_command.run(f"uci show wireless | grep {iface}")
+    if errorcode == 0:
+        result = result[0].split('.')[1]
+        result, _, errorcode = shell_command.run(f"uci get wireless.{result}.ifname")
+        assert errorcode == 0
+        result, _, errorcode = shell_command.run(f"iwinfo {result[0]} info")
+        assert "Mode: Mesh Point" in " ".join(result)
+    else:
+        pytest.skip(f"Skipping test of {iface}, does not exist")
