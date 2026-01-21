@@ -93,3 +93,7 @@ def exporter_command(target):
     net = target.get_driver("NetworkInterfaceDriver")
     return sshmanager.get(net.iface.host)
 
+@pytest.fixture(scope="session")
+def package_manager(target, configured):
+    return target.get_driver("OpenWrtPackageDriver")
+
