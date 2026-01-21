@@ -1,21 +1,26 @@
 targets:
   main:
     features:
+      - bbbconfig
       - ramboot_then_flash
-      - ramboot
+      - dsl_modem
       - console
       - reset
       - wifi
       - online
+      - olsr
     options:
-      hostname: 'testdev01'
-      lan_ip: '10.248.248.1'
+      hostname: 'testdev02'
+      lan_ip: '10.248.248.17'
       lan_netmask: '255.255.255.240'
-      lan_vlan: 101
-      connected_port: wan
+      lan_vlan: 102
+      connected_port: 'lan1'
+      switch_ports: '0 1 2 3 4'
+      switch_connected_port: '1'
+      switch_cpuport: '0'
     resources:
       - RemotePlace:
-          name: port1
+          name: port2
     drivers:
       - GpioDigitalOutputDriver:
           name: powerdriver
@@ -36,36 +41,41 @@ targets:
       - TFTPProviderDriver: {}
       - UBootInteractionBoot:
           commands:
-            - mtkautoboot
+            - run fritzboot
       - UBootInteractionRamboot:
           image: "target"
-          mac: "ENV ethaddr"
-          bootpip: "192.168.0.101"
+          mac: "44:4e:6d:af:9c:57"
+          bootpip: "192.168.0.102"
+          sleep: 3
           commands:
             - bootp
             - bootm
       - OpenWrtUBootDriver:
-          prompt: 'MT7981>'
-          autoboot: 'RESET button is pressed'
-          boot_secret: '\x03'
+          prompt: '\(FRITZ7530\) #'
+          autoboot: 'stop autoboot'
+          boot_secret: 'a'
           boot_secret_nolf: True
-          hold_reset_before_uboot: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
-      - OpenWrtUciDriver: {}
+      - OpenWrtUciDriver:
+          config:
+            - set:
+                network:
+                  wan:
+                    proto: "dhcp" # because of DSL modem
       - OpenWrtPackageDriver: {}
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True
       - NetworkInterfaceDriver: {}
-      - OpenWrtStrategy: {}
+      - BBBConfigStrategy: {}
 paths:
   backup: !template "$BASE/backup"
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
   target: !template $LG_IMAGE
-  rescue_ramboot: "firmware/openwrt-24.10.2-mediatek-filogic-cudy_wr3000-v1-initramfs-kernel.bin"
-  sysupgrade: "firmware/openwrt-24.10.2-mediatek-filogic-cudy_wr3000-v1-squashfs-sysupgrade.bin"
+  rescue_ramboot: "firmware/openwrt-24.10.2-ipq40xx-generic-avm_fritzbox-7530-initramfs-uImage.itb"
   restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py
+  - ../../bbbconfig-testlab.py

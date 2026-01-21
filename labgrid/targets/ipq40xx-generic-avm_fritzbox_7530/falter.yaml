@@ -61,6 +61,7 @@ targets:
                 network:
                   wan:
                     proto: 'dhcp' # because of DSL modem
+      - OpenWrtPackageDriver: {}
       - OpenWrtLuCIDriver: {}
       - FreifunkWizardDriver:
           address: "10.248.248.17"

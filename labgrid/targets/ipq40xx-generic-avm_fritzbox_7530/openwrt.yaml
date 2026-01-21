@@ -62,6 +62,7 @@ targets:
                 network:
                   wan:
                     proto: "dhcp" # because of DSL modem
+      - OpenWrtPackageDriver: {}
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True
