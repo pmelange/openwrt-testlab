@@ -1,4 +1,5 @@
 import pytest
+from time import sleep
 from labgrid.util import sshmanager
 
 # pull in some features as fixtures needed to load the target image
@@ -47,6 +48,7 @@ def cpuport(env, target):
 @pytest.fixture(scope="session")
 def load_target(strategy, ramboot_then_flash, flash, ramboot):
     transition = None
+    return strategy
     if ramboot_then_flash or flash:
         transition = "flash"
     if ramboot:
@@ -69,6 +71,7 @@ def shell_command(strategy, load_target):
 def configured(strategy, shell_command):
     try:
         strategy.transition("config")
+        sleep(1)
         return True
     except Exception:
         pytest.exit("Failed to transition to state config", returncode=3)

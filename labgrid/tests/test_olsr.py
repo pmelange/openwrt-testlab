@@ -1,9 +1,19 @@
 import pytest
+from labgrid.util import Timeout
 
 @pytest.mark.lg_feature("olsr")
 def test_olsr_installed(package_manager):
     result = package_manager.list_installed("olsrd")
     assert "olsrd" in " ".join(result)
+
+@pytest.mark.lg_feature("olsr")
+def test_olsr_ubus_wait(shell_command):
+    timeout = Timeout(120.0)
+    while not timeout.expired:
+        _, _, errorcode = shell_command._run("ubus -t 10 wait_for olsrd")
+        if errorcode == 0:
+            break
+    assert errorcode == 0
 
 @pytest.mark.lg_feature("olsr")
 def test_olsr_pid(shell_command):
