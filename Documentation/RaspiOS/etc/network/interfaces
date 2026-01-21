@@ -18,10 +18,15 @@ iface eth0 inet static
 auto eth0.42
 iface eth0.42 inet static
 	vlan-raw-device eth0.42
-	address 10.31.183.137/28
-	netmask 255.255.255.240
-	gateway 10.31.183.129
-	dns 10.31.183.129
+	address 10.248.46.30
+	netmask 255.255.255.224
+	gateway 10.248.46.1
+	dns 10.248.46.1
+	up ip route add 10.31.0.0/16 via 10.248.46.1
+	up ip route add 10.36.0.0/16 via 10.248.46.1
+	up ip route add 10.230.0/16 via 10.248.46.1
+	up ip route add 10.248.0.0/14 via 10.248.46.1
+
 
 auto eth0.101
 iface eth0.101 inet manual
