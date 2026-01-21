@@ -38,6 +38,7 @@ class FalterStrategy(Strategy):
         "uboot": "LinuxBootProtocol",
         "shell": "OpenWrtShellDriver",
         "uci": "OpenWrtUciDriver",
+        "pkg": "OpenWrtPackageDriver",
         "ffwizard": "FreifunkWizardDriver",
         "ssh": "SSHDriver",
         "net": "NetworkInterfaceDriver",

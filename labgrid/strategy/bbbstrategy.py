@@ -38,6 +38,7 @@ class BBBConfigStrategy(Strategy):
         "shell": "OpenWrtShellDriver",
         "tftp": "TFTPProviderDriver",
         "uci": "OpenWrtUciDriver",
+        "pkg": "OpenWrtPackageDriver",
         "ssh": "SSHDriver",
         "net": "NetworkInterfaceDriver",
     }
@@ -53,13 +54,16 @@ class BBBConfigStrategy(Strategy):
     def exporter_release_lease(self):
         self.target.activate(self.net)
         con = sshmanager.get(self.net.iface.host)
+        self.logger.info(f"""running 'dhclieint -r {self.net.iface.ifname}'""")
         con.run(f"""sudo dhclient -r {self.net.iface.ifname}""")
 
     @step()
     def exporter_renew_lease(self):
         self.target.activate(self.net)
         con = sshmanager.get(self.net.iface.host)
+        self.logger.info(f"""running 'dhclient -r {self.net.iface.ifname}'""")
         con.run(f"""sudo dhclient -r {self.net.iface.ifname}""")
+        self.logger.info(f"""running 'dhclient {self.net.iface.ifname}'""")
         con.run(f"""sudo dhclient {self.net.iface.ifname}""")
         timeout = Timeout(60.0)
         while not timeout.expired:

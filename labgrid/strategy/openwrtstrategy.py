@@ -38,6 +38,7 @@ class OpenWrtStrategy(Strategy):
         "shell": "OpenWrtShellDriver",
         "tftp": "TFTPProviderDriver",
         "uci": "OpenWrtUciDriver",
+        "pkg": "OpenWrtPackageDriver",
         "ssh": "SSHDriver",
         "net": "NetworkInterfaceDriver",
     }

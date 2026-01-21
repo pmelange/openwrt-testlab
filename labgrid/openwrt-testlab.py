@@ -9,6 +9,7 @@ from driver.openwrtubootdriver import OpenWrtUBootDriver
 from driver.openwrtucidriver import OpenWrtUciDriver
 from driver.openwrtlucidriver import OpenWrtLuCIDriver
 from driver.openwrtshelldriver import OpenWrtShellDriver
+from driver.openwrtpackagedriver import OpenWrtPackageDriver
 from driver.ubootinteraction import UBootInteractionBoot, \
                                     UBootInteractionFlash, \
                                     UBootInteractionRamboot, \
