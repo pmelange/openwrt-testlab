@@ -122,7 +122,7 @@ class OpenWrtShellDriver(ShellDriver):
                         "Rebooting system",
                         "0.000000] Linux version",
                         TIMEOUT]
-        index, _, _, _ = self.console.expect(expectations, timeout=120)
+        index, _, _, _ = self.console.expect(expectations, timeout=240)
         if index == len(expectations)-1:
             raise ExecutionError("Router is failing with sysupgrade")
 
