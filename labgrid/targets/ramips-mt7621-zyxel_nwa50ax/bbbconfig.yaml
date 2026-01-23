@@ -1,21 +1,21 @@
 targets:
   main:
     features:
+      - bbbconfig
       - ramboot_then_flash
-      - ramboot
       - console
       - reset
       - wifi
       - online
+      - olsr
     options:
-      hostname: 'testdev04'
-      lan_ip: '10.248.248.49'
+      lan_ip: '10.248.248.113'
       lan_netmask: '255.255.255.240'
-      lan_vlan: 104
-      connected_port: lan
+      lan_vlan: 108
+      connected_port: 'lan'
     resources:
       - RemotePlace:
-          name: port4
+          name: port8
     drivers:
       - GpioDigitalOutputDriver:
           name: powerdriver
@@ -34,34 +34,38 @@ targets:
             output: resetdriver
       - SerialDriver: {}
       - TFTPProviderDriver: {}
-      - MikrotikUBootInteractionRamboot:
+      - UBootInteractionBoot:
+          commands:
+            - atgo
+      - UBootInteractionRamboot:
           image: "target"
-          mac: "dc:2c:6e:c3:fa:b9"
-          bootpip: "192.168.0.104"
-          cycle_power: True
-          hold_reset: True
-          hold_timeout: 25
+          mac: "fa:26:d7:78:e2:6c"
+          bootpip: "192.168.0.108"
+          commands:
+            - atns "192.168.0.1; bootp; bootm"
       - OpenWrtUBootDriver:
-          prompt: "IMPOSSIBLE" # we have a silent bootloader
-          silent_uboot: True
-          hold_reset_before_uboot: True
+          prompt: '=>'
+          autoboot: 'stop autoboot'
+          boot_secret: 'a'
+          boot_secret_nolf: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
-          login_timeout: 240
       - OpenWrtUciDriver: {}
       - OpenWrtPackageDriver: {}
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True
       - NetworkInterfaceDriver: {}
-      - OpenWrtStrategy: {}
+      - BBBConfigStrategy: {}
 paths:
   backup: !template "$BASE/backup"
 images:
-  # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
+  # filenames including a prefix of "/srv/tftp/testdevXX/" must be 128 char or less
   target: !template $LG_IMAGE
-  rescue_ramboot: "firmware/openwrt-24.10.2-ipq40xx-mikrotik-mikrotik_sxtsq-5-ac-initramfs-kernel.bin"
-  sysupgrade: "firmware/openwrt-24.10.2-ipq40xx-mikrotik-mikrotik_sxtsq-5-ac-squashfs-sysupgrade.bin"
+  rescue_ramboot: "firmware/openwrt-24.10.0-ramips-mt7621-zyxel_nwa50ax-initramfs-kernel.bin"
+  factory: "firmware/freifunk-falter-1.4.0-ramips-mt7621-zyxel_nwa50ax-squashfs-factory.bin"
+  sysupgrade: "firmware/freifunk-falter-1.4.0-ramips-mt7621-mwa50ax-squashfs-sysupgrade.bin"
   restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py
+  - ../../bbbconfig-testlab.py

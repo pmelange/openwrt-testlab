@@ -51,6 +51,7 @@ targets:
           boot_secret_nolf: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
+      - OpenWrtPackageDriver: {}
       - OpenWrtUciDriver: {}
       - OpenWrtLuCIDriver: {}
       - SSHDriver:

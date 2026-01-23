@@ -49,6 +49,7 @@ targets:
           keyfile: "~/.ssh/id_rsa.pub"
           login_timeout: 240
       - OpenWrtUciDriver: {}
+      - OpenWrtPackageDriver: {}
       - OpenWrtLuCIDriver: {}
       - FreifunkWizardDriver:
           address: "10.248.248.49"

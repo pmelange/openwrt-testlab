@@ -51,6 +51,7 @@ targets:
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
       - OpenWrtUciDriver: {}
+      - OpenWrtPackageDriver: {}
       - OpenWrtLuCIDriver: {}
       - FreifunkWizardDriver:
           address: "10.248.248.113"

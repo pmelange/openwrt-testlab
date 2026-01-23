@@ -1,21 +1,23 @@
 targets:
   main:
     features:
-      - ramboot_then_flash
-      - ramboot
+      - bbbconfig
+      - flash
       - console
       - reset
       - wifi
       - online
+      - olsr
     options:
-      hostname: 'testdev04'
-      lan_ip: '10.248.248.49'
+      lan_ip: '10.248.248.145'
       lan_netmask: '255.255.255.240'
-      lan_vlan: 104
-      connected_port: lan
+      lan_vlan: 110
+      switch_ports: '0 1 2 3 4 5'
+      switch_connected_port: '2'
+      switch_cpuport: '0'
     resources:
       - RemotePlace:
-          name: port4
+          name: port10
     drivers:
       - GpioDigitalOutputDriver:
           name: powerdriver
@@ -34,34 +36,41 @@ targets:
             output: resetdriver
       - SerialDriver: {}
       - TFTPProviderDriver: {}
-      - MikrotikUBootInteractionRamboot:
+      - UBootInteractionBoot:
+          commands:
+            - boot
+      - UBootInteractionFlash:
           image: "target"
-          mac: "dc:2c:6e:c3:fa:b9"
-          bootpip: "192.168.0.104"
-          cycle_power: True
-          hold_reset: True
-          hold_timeout: 25
+          sleep: 3
+          commands:
+            - setenv ipaddr 192.168.0.110
+            - setenv serverip 192.168.0.1
+            - tftpboot 0x80060000 $IMAGE
+            - erase 0x9f020000 +7c0000
+            - cp.b 0x80060000 0x9f020000 0x7c0000
+            - reset
       - OpenWrtUBootDriver:
-          prompt: "IMPOSSIBLE" # we have a silent bootloader
-          silent_uboot: True
-          hold_reset_before_uboot: True
+          prompt: 'db12x>'
+          autoboot: 'Autobooting in'
+          boot_secret: 'tpl'
+          boot_secret_nolf: True
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
-          login_timeout: 240
       - OpenWrtUciDriver: {}
       - OpenWrtPackageDriver: {}
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True
       - NetworkInterfaceDriver: {}
-      - OpenWrtStrategy: {}
+      - BBBConfigStrategy: {}
 paths:
   backup: !template "$BASE/backup"
 images:
-  # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
+  # filenames including a prefix of "/srv/tftp/testdevXX/" must be 128 char or less
   target: !template $LG_IMAGE
-  rescue_ramboot: "firmware/openwrt-24.10.2-ipq40xx-mikrotik-mikrotik_sxtsq-5-ac-initramfs-kernel.bin"
-  sysupgrade: "firmware/openwrt-24.10.2-ipq40xx-mikrotik-mikrotik_sxtsq-5-ac-squashfs-sysupgrade.bin"
+  sysupgrade: "firmware/freifunk-falter-1.4.0-ath79-generic-tplink_tl-wdr3600-v1-squashfs-sysupgrade.bin"
+  factory: "firmware/freifunk-falter-1.4.0-ath79-generic-tplink_tl-wdr3600-v1-squashfs-factory.bin"
   restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py
+  - ../../bbbconfig-testlab.py

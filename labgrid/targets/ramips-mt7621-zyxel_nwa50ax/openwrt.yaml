@@ -50,6 +50,7 @@ targets:
       - OpenWrtShellDriver:
           keyfile: "~/.ssh/id_rsa.pub"
       - OpenWrtUciDriver: {}
+      - OpenWrtPackageDriver: {}
       - OpenWrtLuCIDriver: {}
       - SSHDriver:
           explicit_scp_mode: True

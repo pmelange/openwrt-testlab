@@ -1,14 +1,14 @@
 targets:
   main:
     features:
+      - bbbconfig
       - ramboot_then_flash
-      - ramboot
       - console
       - reset
       - wifi
       - online
+      - olsr
     options:
-      hostname: 'testdev04'
       lan_ip: '10.248.248.49'
       lan_netmask: '255.255.255.240'
       lan_vlan: 104
@@ -42,7 +42,7 @@ targets:
           hold_reset: True
           hold_timeout: 25
       - OpenWrtUBootDriver:
-          prompt: "IMPOSSIBLE" # we have a silent bootloader
+          prompt: 'IMPOSSIBLE' # we have a silent bootloader
           silent_uboot: True
           hold_reset_before_uboot: True
       - OpenWrtShellDriver:
@@ -54,14 +54,14 @@ targets:
       - SSHDriver:
           explicit_scp_mode: True
       - NetworkInterfaceDriver: {}
-      - OpenWrtStrategy: {}
+      - BBBConfigStrategy: {}
 paths:
   backup: !template "$BASE/backup"
 images:
-  # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
+  # filenames including a prefix of "/srv/tftp/testdevXX/" must be 128 char or less
   target: !template $LG_IMAGE
   rescue_ramboot: "firmware/openwrt-24.10.2-ipq40xx-mikrotik-mikrotik_sxtsq-5-ac-initramfs-kernel.bin"
-  sysupgrade: "firmware/openwrt-24.10.2-ipq40xx-mikrotik-mikrotik_sxtsq-5-ac-squashfs-sysupgrade.bin"
   restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py
+  - ../../bbbconfig-testlab.py
