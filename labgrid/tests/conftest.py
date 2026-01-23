@@ -48,7 +48,7 @@ def cpuport(env, target):
 @pytest.fixture(scope="session")
 def load_target(strategy, ramboot_then_flash, flash, ramboot):
     transition = None
-    return strategy
+#    return strategy
     if ramboot_then_flash or flash:
         transition = "flash"
     if ramboot:
