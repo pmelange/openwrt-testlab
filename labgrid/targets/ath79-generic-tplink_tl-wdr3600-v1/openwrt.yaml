@@ -76,9 +76,5 @@ paths:
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
   target: !template $LG_IMAGE
-  initramfs: "firmware/openwrt-24.10.3-ath79-generic-tplink_tl-wdr3600-v1-initramfs-kernel.bin"
-  factory: "firmware/openwrt-24.10.3-ath79-generic-tplink_tl-wdr3600-v1-squashfs-factory.bin"
-  sysupgrade: "firmware/openwrt-24.10.3-ath79-generic-tplink_tl-wdr3600-v1-squashfs-sysupgrade.bin"
-  restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py

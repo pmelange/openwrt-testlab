@@ -35,7 +35,7 @@ targets:
       - SerialDriver: {}
       - TFTPProviderDriver: {}
       - MikrotikUBootInteractionRamboot:
-          image: "target"
+          image: "rescue_ramboot"
           mac: "b8:69:f4:9c:41:4c"
           bootpip: "192.168.0.109"
           cycle_power: True
@@ -60,8 +60,6 @@ images:
   # filenames including a prefix of "/srv/tftp/testdevXX/" must be 128 char or less
   target: !template $LG_IMAGE
   rescue_ramboot: "firmware/openwrt-23.05.0-rc3-ramips-mt7621-mikrotik_routerboard-750gr3-initramfs-kernel.bin"
-  sysupgrade: "firmware/freifunk-falter-1.4.0-ramips-mt7621-mikrotik_routerboard-750gr3-squashfs-sysupgrade.bin"
-  restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py
   - ../../bbbconfig-testlab.py

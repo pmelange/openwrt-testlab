@@ -2,7 +2,6 @@ targets:
   main:
     features:
       - flash
-      - ramboot
       - console
       - reset
       - wifi
@@ -39,22 +38,11 @@ targets:
             - boot
       - UBootInteractionFlash:
           image: "target"
-          sleep: 1
+          sleep: 3
           commands:
             - setenv ipaddr 192.168.0.103
             - setenv serverip 192.168.0.1
             - tftpboot $IMAGE
-            - sf probe 0
-            - sf erase 0x60000 0xf80000
-            - sf write 0x1000000 0x60000 0xf80000
-            - boot
-      - UBootInteractionRamboot:
-          image: "target"
-          sleep: 1
-          mac: "00:04:9f:ef:01:01"
-          bootpip: "192.168.0.103"
-          commands:
-            - bootp
             - sf probe 0
             - sf erase 0x60000 0xf80000
             - sf write 0x1000000 0x60000 0xf80000

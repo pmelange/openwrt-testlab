@@ -38,11 +38,12 @@ targets:
           commands:
             - atgo
       - UBootInteractionRamboot:
-          image: "target"
-          mac: "fa:26:d7:78:e2:6c"
-          bootpip: "192.168.0.108"
+          image: "rescue_ramboot"
           commands:
-            - atns "192.168.0.1; bootp; bootm"
+            - atnf $IMAGE
+            - atna 192.168.0.108
+            - atns "192.168.0.1; tftpboot"
+            - atns "192.168.0.1; bootm"
       - OpenWrtUBootDriver:
           prompt: '=>'
           autoboot: 'stop autoboot'
@@ -62,10 +63,7 @@ paths:
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX/" must be 128 char or less
   target: !template $LG_IMAGE
-  rescue_ramboot: "firmware/openwrt-24.10.0-ramips-mt7621-zyxel_nwa50ax-initramfs-kernel.bin"
-  factory: "firmware/freifunk-falter-1.4.0-ramips-mt7621-zyxel_nwa50ax-squashfs-factory.bin"
-  sysupgrade: "firmware/freifunk-falter-1.4.0-ramips-mt7621-mwa50ax-squashfs-sysupgrade.bin"
-  restore: "backup/restore.tar.gz"
+  rescue_ramboot: "firmware/openwrt-24.10.3-ramips-mt7621-zyxel_nwa50ax-initramfs-kernel.bin"
 imports:
   - ../../openwrt-testlab.py
   - ../../bbbconfig-testlab.py

@@ -1,7 +1,6 @@
 targets:
   main:
     features:
-      - ramboot_then_flash
       - ramboot
       - dsl_modem
       - console
@@ -43,11 +42,11 @@ targets:
             - run fritzboot
       - UBootInteractionRamboot:
           image: "target"
-          mac: "44:4e:6d:af:9c:57"
-          bootpip: "192.168.0.102"
           sleep: 3
           commands:
-            - bootp
+            - setenv ipaddr 192.168.0.102
+            - setenv serverip 192.168.0.1
+            - tftpboot $IMAGE
             - bootm
       - OpenWrtUBootDriver:
           prompt: '\(FRITZ7530\) #'
@@ -73,7 +72,5 @@ paths:
 images:
   # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
   target: !template $LG_IMAGE
-  rescue_ramboot: "firmware/openwrt-24.10.2-ipq40xx-generic-avm_fritzbox-7530-initramfs-uImage.itb"
-  restore: "backup/restore.tar.gz"
 imports:
   - ../../openwrt-testlab.py
