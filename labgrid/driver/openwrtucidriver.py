@@ -228,9 +228,14 @@ class OpenWrtUciDriver(Driver):
         self.set('network', 'lan', 'ipaddr', lan_ip)
         self.set('network', 'lan', 'netmask', lan_netmask)
 
-        # assume DSA switch unless 'swconfig' is installed
+        # assume DSA switch unless 'swconfig' is installed and lists something
+        dsa = True
         _, _, errorcode = self.shell.run("which swconfig")
-        if errorcode == 1:
+        if errorcode == 0:
+            result, _, self.shell.run("swconfig list")
+            if "Found" in result[0]:
+                dsa = False
+        if dsa == True:
             # DSA switch
             connected_port = self.target.env.config.get_target_option(self.target.name,
                                                                       'connected_port')
