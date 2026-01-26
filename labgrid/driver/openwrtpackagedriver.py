@@ -56,7 +56,7 @@ class OpenWrtPackageDriver(Driver):
     @step(args=['pkgname'])
     def list_installed(self, pkgname = "*"):
         if self.cmd == PkgManager.opkg:
-            result, _, _ = self.shell.run(f"""opkg list-intalled "{pkgname}" """)
+            result, _, _ = self.shell.run(f"""opkg list-installed "{pkgname}" """)
             return result
         elif self.cmd == PkgManager.apk:
             result, _, error = self.shell.run(f"""apk list --installed "{pkgname}" """)
