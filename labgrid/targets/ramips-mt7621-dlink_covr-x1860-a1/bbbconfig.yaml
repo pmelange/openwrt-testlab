@@ -6,7 +6,7 @@ targets:
       - console
       - reset
       - wifi
-      - online
+      - namespace_online
       - olsr
     options:
       lan_ip: '10.248.248.65'

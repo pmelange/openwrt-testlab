@@ -7,7 +7,7 @@ targets:
       - console
       - reset
       - wifi
-      - online
+      - namespace_online
       - olsr
     options:
       hostname: 'testdev02'
