@@ -1,0 +1,64 @@
+targets:
+  main:
+    features:
+      - ramboot_then_flash
+      - console
+      - reset
+      - wifi
+      - online
+    options:
+      hostname: 'testdev01'
+      lan_ip: '10.36.147.113'
+      lan_netmask: '255.255.255.240'
+      lan_vlan: 101
+      connected_port: eth0
+    resources:
+      - RemotePlace:
+          name: port1
+    drivers:
+      - GpioDigitalOutputDriver:
+          name: powerdriver
+          bindings:
+            gpio: power # resouce name
+      - GpioDigitalOutputDriver:
+          name: resetdriver
+          bindings:
+            gpio: reset # resource name
+      - DigitalOutputPowerDriver:
+          bindings:
+            output: powerdriver
+      - DigitalOutputButtonDriver:
+          delay: 7.0
+          bindings:
+            output: resetdriver
+      - SerialDriver: {}
+      - TFTPProviderDriver: {}
+      - UBootInteractionRamboot:
+          image: "target"
+          commands:
+            - setenv autostart no
+            - setenv ipaddr 192.168.0.101
+            - setenv serverip 192.168.0.1
+            - tftpboot $IMAGE
+      - OpenWrtUBootDriver:
+          prompt: 'apboot>'
+          autoboot: 'stop autoboot:'
+          boot_secret: '\x03'
+      - OpenWrtShellDriver:
+          keyfile: "~/.ssh/id_rsa.pub"
+      - OpenWrtUciDriver: {}
+      - OpenWrtPackageDriver: {}
+      - OpenWrtLuCIDriver: {}
+      - SSHDriver:
+          explicit_scp_mode: True
+      - NetworkInterfaceDriver: {}
+      - OpenWrtStrategy: {}
+paths:
+  backup: !template "$BASE/backup"
+images:
+  # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
+  target: !template $LG_IMAGE
+  rescue_ramboot: "firmware/openwrt-ipq806x-generic-aruba_ap-325-initramfs.ari"
+  restore: "backup/restore.tar.gz"
+imports:
+  - ../../openwrt-testlab.py
