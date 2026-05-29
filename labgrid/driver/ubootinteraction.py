@@ -111,7 +111,8 @@ class UBootInteraction(Driver):
                 command = re.sub("\$IMAGE", self._imagepath, command)
             self._run(command)
         if len(self.commands) > 0:
-            self.console.sendline(self.commands[-1])
+            command = re.sub("\$IMAGE", self._imagepath, self.commands[-1])
+            self.console.sendline(command)
 
     @step()
     def finish(self):
