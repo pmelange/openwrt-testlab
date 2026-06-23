@@ -7,8 +7,8 @@ targets:
       - wifi
       - online
     options:
-      hostname: 'testdev01'
-      lan_ip: '10.36.147.113'
+      hostname: 'testdev07'
+      lan_ip: '10.248.248.97'
       lan_netmask: '255.255.255.240'
       lan_vlan: 101
       connected_port: eth0
@@ -37,7 +37,7 @@ targets:
           image: "target"
           commands:
             - setenv autostart no
-            - setenv ipaddr 192.168.0.101
+            - setenv ipaddr 192.168.0.107
             - setenv serverip 192.168.0.1
             - tftpboot $IMAGE
       - OpenWrtUBootDriver:
