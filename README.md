@@ -4,7 +4,7 @@ The idea behind the openwrt-testlab is to provide a way to programtically test n
 
 Future plans include adding smartphones and other devices to test WiFi connectivity with the attached OpenWrt devices.
 
-<img src="https://github.com/user-attachments/assets/1feafc32-8c37-40c1-9edd-7dd33aaff0ce" width="30%">
+<img src="https://github.com/user-attachments/assets/5fcffb7c-62f4-4c85-9ea6-d68c6f278402" width="30%">
 <img src="https://github.com/user-attachments/assets/342c0612-ab7b-4b83-ad80-b10386c611cb" width="30%">
 <img src="https://github.com/user-attachments/assets/a955a3a7-a62a-4301-84dc-18d35c71b239" width="30%">
 
