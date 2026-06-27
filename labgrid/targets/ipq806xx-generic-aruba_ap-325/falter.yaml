@@ -1,0 +1,87 @@
+targets:
+  main:
+    features:
+      - falter
+      - ramboot_then_flash
+      - console
+      - reset
+      - wifi
+      - online
+      - olsr
+    options:
+      lan_ip: '10.248.248.97'
+      lan_netmask: '255.255.255.240'
+      lan_vlan: 107
+      connected_port: 'eth0'
+    resources:
+      - RemotePlace:
+          name: port7
+    drivers:
+      - GpioDigitalOutputDriver:
+          name: powerdriver
+          bindings:
+            gpio: power # resouce name
+      - GpioDigitalOutputDriver:
+          name: resetdriver
+          bindings:
+            gpio: reset # resource name
+      - DigitalOutputPowerDriver:
+          bindings:
+            output: powerdriver
+      - DigitalOutputButtonDriver:
+          delay: 7.0
+          bindings:
+            output: resetdriver
+      - SerialDriver: {}
+      - TFTPProviderDriver: {}
+      - UBootInteractionRamboot:
+          image: "rescue_ramboot"
+          commands:
+            - setenv autoboot no
+            - setenv ipaddr 192.168.0.106
+            - setenv serverip 192.168.0.1
+            - tftpboot $IMAGE
+      - OpenWrtUBootDriver:
+          prompt: 'apboot>'
+          autoboot: 'stop autoboot'
+          boot_secret: '\x03'
+      - OpenWrtShellDriver:
+          keyfile: "~/.ssh/id_rsa.pub"
+      - OpenWrtUciDriver: {}
+      - OpenWrtPackageDriver: {}
+      - OpenWrtLuCIDriver: {}
+      - FreifunkWizardDriver:
+          address: "10.248.248.97"
+          password: "abc123"
+          network: "Freifunk Berlin"
+          hostname: "testdev07"
+          nickname: "testlabuser"
+          realname: "openwrt-testlab"
+          email: "email@address"
+          location: "Panoramastrasse 1A, 10178 Berlin"
+          lat: "52.52081970085464"
+          lon: "13.409418231737128"
+          alt: "368"
+          sharedInternet: True
+          bw_down: "60"
+          bw_up: "20"
+          stats: False
+          meship_radio0: "10.248.251.96"
+          meshmode_radio0: "80211s"
+          meship_radio1: "10.248.251.97"
+          meshmode_radio1: "80211s"
+          ssid: "testdev07.berlin.freifunk.net"
+          dhcp: "10.248.248.96/28"
+      - SSHDriver:
+          explicit_scp_mode: True
+      - NetworkInterfaceDriver: {}
+      - FalterStrategy: {}
+paths:
+  backup: !template "$BASE/backup"
+images:
+  # filenames including a prefix of "/srv/tftp/testdevXX" must be 128 char or less
+  target: !template $LG_IMAGE
+  rescue_ramboot: "firmware/openwrt-ipq806x-generic-aruba_ap-32x-initramfs.ari"
+imports:
+  - ../../openwrt-testlab.py
+  - ../../falter-testlab.py
