@@ -12,6 +12,9 @@ targets:
       lan_netmask: '255.255.255.240'
       lan_vlan: 103
       connected_port: 'lan1'
+      switch_ports: '0 1 2 3 4 5'
+      switch_connected_port: '2'
+      switch_cpuport: '0'
     resources:
       - RemotePlace:
           name: port3
