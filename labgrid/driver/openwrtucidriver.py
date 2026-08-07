@@ -233,7 +233,7 @@ class OpenWrtUciDriver(Driver):
         _, _, errorcode = self.shell.run("which swconfig")
         if errorcode == 0:
             result, _, _ = self.shell.run("swconfig list")
-            if "Found" in result[0]:
+            if  len(result) > 0 and "Found" in result[0]:
                 dsa = False
         if dsa == True:
             # DSA switch
