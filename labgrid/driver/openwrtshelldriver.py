@@ -63,7 +63,7 @@ class OpenWrtShellDriver(ShellDriver):
             wait for ubus to be ready, default set to OpenWrt standard
     """
     bindings = {"console": ConsoleProtocol, }
-    prompt = attr.ib(default="root@[-\w()]+:[^ ]+ ", validator=attr.validators.instance_of(str))
+    prompt = attr.ib(default=r"root@[-\w()]+:[^ ]+ ", validator=attr.validators.instance_of(str))
     login_prompt = attr.ib(default="Please press Enter to activate this console.", validator=attr.validators.instance_of(str))
     username = attr.ib(default="root", validator=attr.validators.instance_of(str))
     password = attr.ib(default=None, validator=attr.validators.optional(attr.validators.instance_of(str)))
