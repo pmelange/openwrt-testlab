@@ -48,6 +48,11 @@ class OpenWrtLuCIDriver(Driver):
 
         self._browser = webdriver.Chrome(service=self._service, 
                                          options=self._options)
+        self._browser.execute_cdp_cmd('Storage.clearDataForOrigin', {
+            "origin": '*',
+            "storageTypes": 'all',
+        })
+
         self._browser.implicitly_wait(5)
 
     def on_deactivate(self):
